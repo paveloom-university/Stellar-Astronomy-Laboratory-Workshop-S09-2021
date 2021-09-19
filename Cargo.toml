@@ -1,0 +1,26 @@
+[package]
+name = "kidou"
+version = "0.1.0"
+authors = ["Pavel Sobolev <paveloom@tuta.io>"]
+edition = "2018"
+description = "Calculate the orbits of globular clusters in a model of the Galaxy potential"
+documentation = "???"
+readme = "README.md"
+homepage = "https://gitlab.com/paveloom-g/university/stellar-astronomy-laboratory-workshop-s09-2021"
+repository = "https://gitlab.com/paveloom-g/university/stellar-astronomy-laboratory-workshop-s09-2021"
+license-file = "LICENSE.md"
+keywords = ["astronomy", "globular", "clusters", "orbits", "integration"]
+categories = ["command-line-utilities"]
+
+[profile.dev]
+panic = 'abort'
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = 'abort'
+
+[dependencies]
+clap = {version = "=2.33.3"}
+csv = {version = "=1.1.6"}
+serde = {version = "=1.0.130", features = ["derive"]}

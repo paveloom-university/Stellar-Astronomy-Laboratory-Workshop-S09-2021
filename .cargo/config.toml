@@ -1,0 +1,11 @@
+[alias]
+lint = [
+     "clippy",
+     "--",
+     "-D",
+     "clippy::pedantic",
+     "-D",
+     "clippy::cargo",
+     "-A",
+     "clippy::if_not_else",
+]
