@@ -3,19 +3,7 @@
 use clap::Values;
 use csv::{ByteRecord, ReaderBuilder};
 
-use super::super::{Initials, Orbit};
-
-/// Status codes for the parsing process
-enum Status {
-    /// A CSV reader couldn't be built
-    ReaderBuilderFailed,
-    /// Couldn't parse the headers
-    ParsingHeadersFailed,
-    /// The headers are wrong
-    WrongHeader,
-    /// Parsed successfully this amount of orbits
-    Parsed(i32),
-}
+use super::super::{HeliocentricCartesianInitials, Orbit};
 
 /// A representation of the results after parsing the files
 pub struct Log<'a> {
@@ -24,7 +12,7 @@ pub struct Log<'a> {
     /// Paths to the parsed files (as specified by a user)
     files: Vec<&'a str>,
     /// A vector of status codes for each file
-    statuses: Vec<Status>,
+    statuses: Vec<String>,
 }
 
 impl Orbit {
@@ -40,7 +28,7 @@ impl Orbit {
         // Prepare an array of orbits
         let mut orbits = Vec::<Orbit>::new();
         // Prepare a mask of status codes
-        let mut statuses = Vec::<Status>::with_capacity(len);
+        let mut statuses = Vec::<String>::with_capacity(len);
         // Prepare two byte records for headers and data
         let mut headers = ByteRecord::new();
         let mut record = ByteRecord::new();
@@ -59,14 +47,14 @@ impl Orbit {
                 // If the headers are empty
                 if headers.is_empty() {
                     // Put the appropriate status and skip this file
-                    statuses.push(Status::ParsingHeadersFailed);
+                    statuses.push("PF".to_string());
                 // Or, if the header isn't correct
                 } else if headers.as_slice()
                     != &b"x_0x_0_erry_0y_0_errz_0z_0_erru_0u_0_errv_0v_0_errw_0w_0_err"[..]
                     || headers.len() != 12
                 {
                     // Put the appropriate status and skip this file
-                    statuses.push(Status::WrongHeader);
+                    statuses.push("WH".to_string());
                 // Otherwise,
                 } else {
                     // Reset the count of records that were successfully deserialized and parsed
@@ -76,9 +64,11 @@ impl Orbit {
                         // If a record was read
                         if read {
                             // If the record could be deserialized
-                            if let Ok(initials) = record.deserialize::<Initials>(Some(&headers)) {
+                            if let Ok(hc_initials) =
+                                record.deserialize::<HeliocentricCartesianInitials>(Some(&headers))
+                            {
                                 // Create and save an orbit from initial coordinates and velocities
-                                orbits.push(Orbit::from(initials));
+                                orbits.push(Orbit::from(hc_initials));
                                 counter += 1;
                             }
                         // Otherwise,
@@ -87,12 +77,12 @@ impl Orbit {
                         }
                     }
                     // Put the appropriate status and finish with this file
-                    statuses.push(Status::Parsed(counter));
+                    statuses.push(counter.to_string());
                 }
             // Otherwise,
             } else {
                 // Put the appropriate status and skip this file
-                statuses.push(Status::ReaderBuilderFailed);
+                statuses.push("RF".to_string());
             }
         }
 
@@ -112,23 +102,12 @@ impl<'a> Log<'a> {
     pub fn format(&self, padding: usize) -> String {
         // Prepare strings for the output and the status codes
         let mut s = String::new();
-        let mut code = String::new();
         // For each file
         for i in 0..self.len {
-            // Get its status
-            if let Some(status) = self.statuses.get(i) {
-                // Define the string representation of the status code
-                match status {
-                    Status::ReaderBuilderFailed => code = "RF".to_owned(),
-                    Status::ParsingHeadersFailed => code = "PF".to_owned(),
-                    Status::WrongHeader => code = "WH".to_owned(),
-                    Status::Parsed(i) => code = format!("{}", i),
-                }
-            }
             // Append a string with the stringified status code and the file path
             s.push_str(&format!(
                 "{:1$}({2}) {3:?}\n",
-                "", padding, &code, self.files[i]
+                "", padding, &self.statuses[i], self.files[i]
             ));
         }
         s

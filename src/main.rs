@@ -63,4 +63,9 @@ fn main() {
             orbits.len()
         );
     }
+
+    // Integrate each orbit
+    for ref mut orbit in orbits {
+        orbit.integrate();
+    }
 }
