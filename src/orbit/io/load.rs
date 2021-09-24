@@ -3,7 +3,7 @@
 use clap::Values;
 use csv::{ByteRecord, ReaderBuilder};
 
-use super::super::{HeliocentricCartesianInitials, Orbit};
+use crate::orbit::{HeliocentricCartesianInitials, Orbit};
 
 /// A representation of the results after parsing the files
 pub struct Log<'a> {

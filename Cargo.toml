@@ -12,9 +12,6 @@ license-file = "LICENSE.md"
 keywords = ["astronomy", "globular", "clusters", "orbits", "integration"]
 categories = ["command-line-utilities"]
 
-[profile.dev]
-panic = 'abort'
-
 [profile.release]
 lto = true
 codegen-units = 1

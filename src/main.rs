@@ -66,6 +66,6 @@ fn main() {
 
     // Integrate each orbit
     for ref mut orbit in orbits {
-        orbit.integrate();
+        orbit.integrate(1000, 0.001);
     }
 }

@@ -139,6 +139,28 @@ impl GalacticCylindricalInitials {
     }
 }
 
+/// Integrated coordinates of a globular cluster
+/// in the Galactic Cylindrical system
+pub struct GalacticCylindricalIntegrated {
+    /// R coordinate (kpc)
+    r: Vec<F>,
+    /// $ \psi $ coordinate (radians)
+    psi: Vec<F>,
+    /// Z coordinate (kpc)
+    z: Vec<F>,
+}
+
+impl GalacticCylindricalIntegrated {
+    /// Initialize a new struct with default values
+    fn new() -> Self {
+        GalacticCylindricalIntegrated {
+            r: Vec::<F>::new(),
+            psi: Vec::<F>::new(),
+            z: Vec::<F>::new(),
+        }
+    }
+}
+
 /// An orbit of a globular cluster
 pub struct Orbit {
     /// Initial coordinates and velocities in the Heliocentric Cartesian system
@@ -147,6 +169,8 @@ pub struct Orbit {
     gca_initials: GalacticCartesianInitials,
     /// Initial coordinates and velocities in the Galactic Cylindrical system
     gcy_initials: GalacticCylindricalInitials,
+    /// Integrated coordinates of a globular cluster in the Galactic Cylindrical system
+    gcy_integrated: GalacticCylindricalIntegrated,
 }
 
 impl Orbit {
@@ -157,6 +181,7 @@ impl Orbit {
             hc_initials,
             gca_initials: GalacticCartesianInitials::new(),
             gcy_initials: GalacticCylindricalInitials::new(),
+            gcy_integrated: GalacticCylindricalIntegrated::new(),
         }
     }
 }
