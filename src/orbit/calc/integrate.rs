@@ -92,6 +92,26 @@ fn f_p_z(r: F, z: F) -> F {
     -phi_dz(r, z)
 }
 
+/// Calculate total energy (km^2 / s^2)
+fn total_energy(r: F, psi: F, z: F, p_r: F, p_psi: F, p_z: F) -> F {
+    ((-(p_r / KM_PER_S_TO_KPC_PER_MYR * psi.cos() - p_psi / MYR_TO_S / r / KM_TO_PC * psi.sin())
+        * psi.cos()
+        + (p_r / KM_PER_S_TO_KPC_PER_MYR * psi.sin()
+            + p_psi / MYR_TO_S / r / KM_TO_PC * psi.cos())
+            * psi.sin())
+    .powi(2)
+        + ((p_r / KM_PER_S_TO_KPC_PER_MYR * psi.cos()
+            - p_psi / MYR_TO_S / r / KM_TO_PC * psi.sin())
+            * psi.sin()
+            + (p_r / KM_PER_S_TO_KPC_PER_MYR * psi.sin()
+                + p_psi / MYR_TO_S / r / KM_TO_PC * psi.cos())
+                * psi.cos())
+        .powi(2)
+        + (p_z / KM_PER_S_TO_KPC_PER_MYR).powi(2))
+        / 2.0
+        + phi(r, z) * 100.0
+}
+
 const KM_PER_S_TO_KPC_PER_MYR: F = 0.00102273;
 const HUNDREDS_KM_2_PER_S_2_TO_PC_2_PER_MYR: F = 1.04598e-4;
 const MYR_TO_S: F = 3.2e13;
@@ -157,42 +177,23 @@ impl Orbit {
         //         + phi(self.gcy_initials.r, self.gcy_initials.z) * 100.0
         // );
 
-        // Prepare the vectors for the solution
+        // Prepare the vectors for the solutions
         let mut r = Vec::<F>::with_capacity(n + 1);
         let mut psi = Vec::<F>::with_capacity(n + 1);
         let mut z = Vec::<F>::with_capacity(n + 1);
         let mut p_r = Vec::<F>::with_capacity(n + 1);
         let mut p_psi = Vec::<F>::with_capacity(n + 1);
         let mut p_z = Vec::<F>::with_capacity(n + 1);
+        let mut e = Vec::<F>::with_capacity(n + 1);
         r.push(self.gcy_initials.r);
         psi.push(self.gcy_initials.psi);
         z.push(self.gcy_initials.z);
         p_r.push(self.gcy_initials.r_vel * KM_PER_S_TO_KPC_PER_MYR);
         p_psi.push(self.gcy_initials.r.powi(2) * self.gcy_initials.psi_vel * MYR_TO_S);
         p_z.push(self.gcy_initials.z_vel * KM_PER_S_TO_KPC_PER_MYR);
+        e.push(total_energy(r[0], psi[0], z[0], p_r[0], p_psi[0], p_z[0]));
 
-        println!(
-            "\n{:1$}E at the start: {2:.16e}",
-            "",
-            PADDING + 2,
-            ((-(p_r[0] / KM_PER_S_TO_KPC_PER_MYR * psi[0].cos()
-                - p_psi[0] / MYR_TO_S / r[0] / KM_TO_PC * psi[0].sin())
-                * psi[0].cos()
-                + (p_r[0] / KM_PER_S_TO_KPC_PER_MYR * psi[0].sin()
-                    + p_psi[0] / MYR_TO_S / r[0] / KM_TO_PC * psi[0].cos())
-                    * psi[0].sin())
-            .powi(2)
-                + ((p_r[0] / KM_PER_S_TO_KPC_PER_MYR * psi[0].cos()
-                    - p_psi[0] / MYR_TO_S / r[0] / KM_TO_PC * psi[0].sin())
-                    * psi[0].sin()
-                    + (p_r[0] / KM_PER_S_TO_KPC_PER_MYR * psi[0].sin()
-                        + p_psi[0] / MYR_TO_S / r[0] / KM_TO_PC * psi[0].cos())
-                        * psi[0].cos())
-                .powi(2)
-                + (p_z[0] / KM_PER_S_TO_KPC_PER_MYR).powi(2))
-                / 2.0
-                + phi(r[0], z[0]) * 100.0
-        );
+        println!("\n{:1$}E at the start: {2:.16e}", "", PADDING + 2, e[0]);
 
         // Prepare buffers for the coefficients
         let mut k_r_1: F;
@@ -269,30 +270,10 @@ impl Orbit {
             p_r.push(p_r[i - 1] + 1.0 / 6.0 * (k_p_r_1 + 2.0 * k_p_r_2 + 2.0 * k_p_r_3 + k_p_r_4));
             p_psi.push(p_psi[i - 1]);
             p_z.push(p_z[i - 1] + 1.0 / 6.0 * (k_p_z_1 + 2.0 * k_p_z_2 + 2.0 * k_p_z_3 + k_p_z_4));
+            e.push(total_energy(r[i], psi[i], z[i], p_r[i], p_psi[i], p_z[i]))
         }
 
-        println!(
-            "{:1$}E at the end:   {2:.16e}\n",
-            "",
-            PADDING + 2,
-            ((-(p_r[n] / KM_PER_S_TO_KPC_PER_MYR * psi[n].cos()
-                - p_psi[n] / MYR_TO_S / r[n] / KM_TO_PC * psi[n].sin())
-                * psi[n].cos()
-                + (p_r[n] / KM_PER_S_TO_KPC_PER_MYR * psi[n].sin()
-                    + p_psi[n] / MYR_TO_S / r[n] / KM_TO_PC * psi[n].cos())
-                    * psi[n].sin())
-            .powi(2)
-                + ((p_r[n] / KM_PER_S_TO_KPC_PER_MYR * psi[n].cos()
-                    - p_psi[n] / MYR_TO_S / r[n] / KM_TO_PC * psi[n].sin())
-                    * psi[n].sin()
-                    + (p_r[n] / KM_PER_S_TO_KPC_PER_MYR * psi[n].sin()
-                        + p_psi[n] / MYR_TO_S / r[n] / KM_TO_PC * psi[n].cos())
-                        * psi[n].cos())
-                .powi(2)
-                + (p_z[n] / KM_PER_S_TO_KPC_PER_MYR).powi(2))
-                / 2.0
-                + phi(r[n], z[n]) * 100.0
-        );
+        println!("{:1$}E at the end:   {2:.16e}\n", "", PADDING + 2, e[n]);
 
         // let system = LagrangianEquations {};
 
@@ -320,9 +301,10 @@ impl Orbit {
         // }
 
         // Save the results
-        self.gcy_integrated.r = r;
-        self.gcy_integrated.psi = psi;
-        self.gcy_integrated.z = z;
+        self.integrated.r = r;
+        self.integrated.psi = psi;
+        self.integrated.z = z;
+        self.integrated.e = e;
     }
 }
 

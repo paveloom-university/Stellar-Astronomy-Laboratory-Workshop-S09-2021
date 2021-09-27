@@ -122,7 +122,7 @@ pub struct GalacticCylindricalInitials {
 impl GalacticCylindricalInitials {
     /// Initialize a new struct with default values
     fn new() -> Self {
-        GalacticCylindricalInitials {
+        Self {
             r: 0.0,
             r_err: 0.0,
             psi: 0.0,
@@ -139,24 +139,28 @@ impl GalacticCylindricalInitials {
     }
 }
 
-/// Integrated coordinates of a globular cluster
-/// in the Galactic Cylindrical system
-pub struct GalacticCylindricalIntegrated {
+/// Values integrated during runtime:
+/// - Coordinates of a globular cluster in the Galactic Cylindrical system
+/// - Total energy
+pub struct Integrated {
     /// R coordinate (kpc)
     r: Vec<F>,
     /// $ \psi $ coordinate (radians)
     psi: Vec<F>,
     /// Z coordinate (kpc)
     z: Vec<F>,
+    /// Total energy (km^2 / s^2)
+    e: Vec<F>,
 }
 
-impl GalacticCylindricalIntegrated {
+impl Integrated {
     /// Initialize a new struct with default values
     fn new() -> Self {
-        GalacticCylindricalIntegrated {
+        Self {
             r: Vec::<F>::new(),
             psi: Vec::<F>::new(),
             z: Vec::<F>::new(),
+            e: Vec::<F>::new(),
         }
     }
 }
@@ -174,7 +178,7 @@ pub struct Orbit {
     /// Number of iterations used in the last integration
     n: usize,
     /// Integrated coordinates of a globular cluster in the Galactic Cylindrical system
-    gcy_integrated: GalacticCylindricalIntegrated,
+    integrated: Integrated,
 }
 
 impl Orbit {
@@ -187,7 +191,7 @@ impl Orbit {
             gca_initials: GalacticCartesianInitials::new(),
             gcy_initials: GalacticCylindricalInitials::new(),
             n: 0,
-            gcy_integrated: GalacticCylindricalIntegrated::new(),
+            integrated: Integrated::new(),
         }
     }
     /// Get the ID of the object
