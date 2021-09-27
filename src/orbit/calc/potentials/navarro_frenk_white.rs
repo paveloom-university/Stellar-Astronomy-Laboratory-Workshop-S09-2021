@@ -10,14 +10,16 @@ pub fn phi(r: F, z: F, m: F, a: F) -> F {
 
 /// Calculate the value of the R derivative of the Navarro-Frenk-White potential
 pub fn phi_dr(r: F, z: F, m: F, a: F) -> F {
-    let k_1 = r.powi(2) + z.powi(2);
-    let k_2 = a + k_1;
-    2.0 * m * r * (k_2 * F::ln(k_2 / a) - k_1) / k_1.powi(2) / k_2
+    let sq_sum = r.powi(2) + z.powi(2);
+    let dist = sq_sum.sqrt();
+    let k_1 = dist / a + 1.0;
+    m * r * F::ln(k_1) / sq_sum.powf(1.5) - m * r / a / sq_sum / k_1
 }
 
 /// Calculate the value of the Z derivative of the Navarro-Frenk-White potential
 pub fn phi_dz(r: F, z: F, m: F, a: F) -> F {
-    let k_1 = r.powi(2) + z.powi(2);
-    let k_2 = a + k_1;
-    2.0 * m * z * (k_2 * F::ln(k_2 / a) - k_1) / k_1.powi(2) / k_2
+    let sq_sum = r.powi(2) + z.powi(2);
+    let dist = sq_sum.sqrt();
+    let k_1 = dist / a + 1.0;
+    m * z * F::ln(k_1) / sq_sum.powf(1.5) - m * z / a / sq_sum / k_1
 }

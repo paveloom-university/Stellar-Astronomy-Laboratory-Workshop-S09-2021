@@ -16,29 +16,29 @@ type F = f64;
 #[derive(Deserialize)]
 pub struct HeliocentricCartesianInitials {
     /// X coordinate (kpc)
-    x_0: F,
+    x: F,
     /// Error of the X coordinate (kpc)
-    x_0_err: F,
+    x_err: F,
     /// Y coordinate
-    y_0: F,
+    y: F,
     /// Error of the Y coordinate (kpc)
-    y_0_err: F,
+    y_err: F,
     /// Z coordinate (kpc)
-    z_0: F,
+    z: F,
     /// Error of the Z coordinate (kpc)
-    z_0_err: F,
+    z_err: F,
     /// U velocity (kpc)
-    u_0: F,
+    u: F,
     /// Error of the U velocity (km s^{-1})
-    u_0_err: F,
+    u_err: F,
     /// V velocity (km s^{-1})
-    v_0: F,
+    v: F,
     /// Error of the V velocity (km s^{-1})
-    v_0_err: F,
+    v_err: F,
     /// W velocity (km s^{-1})
-    w_0: F,
+    w: F,
     /// Error of the W velocity (km s^{-1})
-    w_0_err: F,
+    w_err: F,
 }
 
 /// Initial coordinates and velocities of a globular
@@ -163,25 +163,35 @@ impl GalacticCylindricalIntegrated {
 
 /// An orbit of a globular cluster
 pub struct Orbit {
+    /// ID of the object
+    id: String,
     /// Initial coordinates and velocities in the Heliocentric Cartesian system
     hc_initials: HeliocentricCartesianInitials,
     /// Initial coordinates and velocities in the Galactic Cartesian system
     gca_initials: GalacticCartesianInitials,
     /// Initial coordinates and velocities in the Galactic Cylindrical system
     gcy_initials: GalacticCylindricalInitials,
+    /// Number of iterations used in the last integration
+    n: usize,
     /// Integrated coordinates of a globular cluster in the Galactic Cylindrical system
     gcy_integrated: GalacticCylindricalIntegrated,
 }
 
 impl Orbit {
-    /// Initialize an orbit from the initial coordinates and
-    /// velocities in the Heliocentric Cartesian system
-    pub fn from(hc_initials: HeliocentricCartesianInitials) -> Self {
+    /// Initialize an orbit with an ID from the initial coordinates
+    /// and velocities in the Heliocentric Cartesian system
+    pub fn from(id: String, hc_initials: HeliocentricCartesianInitials) -> Self {
         Orbit {
+            id,
             hc_initials,
             gca_initials: GalacticCartesianInitials::new(),
             gcy_initials: GalacticCylindricalInitials::new(),
+            n: 0,
             gcy_integrated: GalacticCylindricalIntegrated::new(),
         }
+    }
+    /// Get the ID of the object
+    pub fn id(&self) -> &String {
+        &self.id
     }
 }

@@ -4,7 +4,10 @@
 //! of Bajkova and Bobylev ([2020, v1](https://arxiv.org/abs/2008.13624v1)).
 
 use clap::{crate_authors, crate_description, crate_name, crate_version, AppSettings, Arg};
-use std::{ffi::OsString, path::Path};
+use std::{
+    ffi::OsString,
+    path::{Path, PathBuf},
+};
 
 mod orbit;
 
@@ -20,7 +23,17 @@ fn main() {
         .help_message("Print help information")
         .version_message("Print version information")
         .after_help("Documentation: ???\nReference: ???")
-        .arg(
+        .args(&[
+            Arg::with_name("results")
+                .help("Set the result directory to use")
+                .required(true)
+                .validator_os(|s| {
+                    if Path::new(s).is_dir() {
+                        Ok(())
+                    } else {
+                        Err(OsString::from(format!("\nNo such dir {:#?}.", s)))
+                    }
+                }),
             Arg::with_name("file(s)")
                 .help("Set the input file(s) to use")
                 .multiple(true)
@@ -32,13 +45,15 @@ fn main() {
                         Err(OsString::from(format!("\nNo such file {:#?}.", s)))
                     }
                 }),
-        )
+        ])
         .settings(&[
             AppSettings::ArgRequiredElseHelp,
             AppSettings::TrailingVarArg,
         ])
         .get_matches();
 
+    // Get path to the results directory
+    let results = PathBuf::from(matches.value_of("results").unwrap());
     // Get values of the input files
     let files = matches.values_of("file(s)").unwrap();
 
@@ -52,7 +67,7 @@ fn main() {
 
     // Check how many orbits (initial coordinates and velocities) were parsed
     if orbits.is_empty() {
-        println!("{:1$}> No orbits were parsed. Exiting.\n", "", PADDING);
+        println!("{:1$}> No orbits were parsed. Exiting.", "", PADDING);
     } else if orbits.len() == 1 {
         println!("{:1$}> One orbit was parsed.\n", "", PADDING);
     } else {
@@ -64,8 +79,17 @@ fn main() {
         );
     }
 
-    // Integrate each orbit
+    // Integrate each orbit and write the results
     for ref mut orbit in orbits {
-        orbit.integrate(1000, 0.001);
+        println!(
+            "{:1$}> Integrating the orbit of {2}...",
+            "",
+            PADDING,
+            orbit.id()
+        );
+        orbit.integrate(1000000, -0.00001);
+        orbit.write(&results);
     }
+
+    println!();
 }
