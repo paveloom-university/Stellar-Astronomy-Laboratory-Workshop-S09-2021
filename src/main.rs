@@ -87,9 +87,7 @@ fn main() {
             PADDING,
             orbit.id()
         );
-        orbit.integrate(1000000, -0.00001);
+        orbit.integrate(5000000, -0.001);
         orbit.write(&results);
     }
-
-    println!();
 }
