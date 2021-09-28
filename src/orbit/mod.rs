@@ -143,14 +143,20 @@ impl GalacticCylindricalInitials {
 /// - Coordinates of a globular cluster in the Galactic Cylindrical system
 /// - Total energy
 pub struct Integrated {
-    /// R coordinate (kpc)
+    /// R coordinate in the Galactic Cylindrical system (kpc)
     r: Vec<F>,
-    /// $ \psi $ coordinate (radians)
+    /// $ \psi $ coordinate in the Galactic Cylindrical system (radians)
     psi: Vec<F>,
-    /// Z coordinate (kpc)
+    /// Z coordinate in the Galactic Cylindrical system (kpc)
     z: Vec<F>,
+    /// X coordinate in the Galactic Cartesian system (kpc)
+    x: Vec<F>,
+    /// Y coordinate in the Galactic Cartesian system (kpc)
+    y: Vec<F>,
     /// Total energy (km^2 / s^2)
     e: Vec<F>,
+    vel: Vec<F>,
+    phi: Vec<F>,
 }
 
 impl Integrated {
@@ -160,7 +166,11 @@ impl Integrated {
             r: Vec::<F>::new(),
             psi: Vec::<F>::new(),
             z: Vec::<F>::new(),
+            x: Vec::<F>::new(),
+            y: Vec::<F>::new(),
             e: Vec::<F>::new(),
+            vel: Vec::<F>::new(),
+            phi: Vec::<F>::new(),
         }
     }
 }

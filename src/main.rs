@@ -65,11 +65,19 @@ fn main() {
     // Print the log
     println!("{}", log.format(PADDING + 2));
 
+    // Define the time step
+    let h = -0.01;
+
+    // Define the number of iterations
+    let n = 500_000;
+
     // Check how many orbits (initial coordinates and velocities) were parsed
     if orbits.is_empty() {
         println!("{:1$}> No orbits were parsed. Exiting.", "", PADDING);
     } else if orbits.len() == 1 {
         println!("{:1$}> One orbit was parsed.\n", "", PADDING);
+        println!("{:1$}h = {2}", "", PADDING + 2, h);
+        println!("{:1$}n = {2}\n", "", PADDING + 2, n);
     } else {
         println!(
             "{:1$}> {2} orbits were parsed.\n",
@@ -77,6 +85,8 @@ fn main() {
             PADDING,
             orbits.len()
         );
+        println!("{:1$}h = {2}", "", PADDING + 2, h);
+        println!("{:1$}n = {2}\n", "", PADDING + 2, n);
     }
 
     // Integrate each orbit and write the results
@@ -87,7 +97,7 @@ fn main() {
             PADDING,
             orbit.id()
         );
-        orbit.integrate(5000000, -0.001);
+        orbit.integrate(n, h);
         orbit.write(&results);
     }
 }

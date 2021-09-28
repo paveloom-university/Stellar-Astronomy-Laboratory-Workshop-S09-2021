@@ -42,11 +42,22 @@ const A_D: F = 4.40;
 const B_D: F = 0.3084;
 const A_H: F = 7.7;
 
+const KPC_PER_MYR_TO_KM_PER_S: F = 977.775_320_024_919;
+const KM_PER_S_TO_KPC_PER_MYR: F = 0.001_022_73;
+const HUNDREDS_KM_2_PER_S_2_TO_KPC_2_PER_MYR_2: F = 1.045_897_218_694_908e-4;
+const S_TO_MYR: F = 3.168_873_850_681_14e-14;
+const MYR_TO_S: F = 3.155_695_2e13;
+const KPC_TO_KM: F = 3.085_677_581_28e+16;
+const KM_TO_KPC: F = 3.240_779_289_666_4e-17;
+
+// const TEST: F = 1.0282;
+
 /// Calculate the value of the Galactic potential
 fn phi(r: F, z: F) -> F {
     plummer::phi(r, z, M_B, B_B)
         + miyamoto_nagai::phi(r, z, M_D, A_D, B_D)
         + navarro_frenk_white::phi(r, z, M_H, A_H)
+    // * TEST
 }
 
 /// Calculate the value of the R derivative of the Galactic potential
@@ -54,8 +65,8 @@ fn phi_dr(r: F, z: F) -> F {
     (plummer::phi_dr(r, z, M_B, B_B)
         + miyamoto_nagai::phi_dr(r, z, M_D, A_D, B_D)
         + navarro_frenk_white::phi_dr(r, z, M_H, A_H))
-        * HUNDREDS_KM_2_PER_S_2_TO_PC_2_PER_MYR
-    // * 1.01216621
+        * HUNDREDS_KM_2_PER_S_2_TO_KPC_2_PER_MYR_2
+    // * TEST
 }
 
 /// Calculate the value of the Z derivative of the Galactic potential
@@ -63,8 +74,8 @@ fn phi_dz(r: F, z: F) -> F {
     (plummer::phi_dz(r, z, M_B, B_B)
         + miyamoto_nagai::phi_dz(r, z, M_D, A_D, B_D)
         + navarro_frenk_white::phi_dz(r, z, M_H, A_H))
-        * HUNDREDS_KM_2_PER_S_2_TO_PC_2_PER_MYR
-    // * 1.01216621
+        * HUNDREDS_KM_2_PER_S_2_TO_KPC_2_PER_MYR_2
+    // * TEST
 }
 
 /// Calculate the right-hand part of the equation for r'
@@ -94,28 +105,23 @@ fn f_p_z(r: F, z: F) -> F {
 
 /// Calculate total energy (km^2 / s^2)
 fn total_energy(r: F, psi: F, z: F, p_r: F, p_psi: F, p_z: F) -> F {
-    ((-(p_r / KM_PER_S_TO_KPC_PER_MYR * psi.cos() - p_psi / MYR_TO_S / r / KM_TO_PC * psi.sin())
+    ((-(p_r * KPC_PER_MYR_TO_KM_PER_S * psi.cos() - p_psi * S_TO_MYR / r * KPC_TO_KM * psi.sin())
         * psi.cos()
-        + (p_r / KM_PER_S_TO_KPC_PER_MYR * psi.sin()
-            + p_psi / MYR_TO_S / r / KM_TO_PC * psi.cos())
+        + (p_r * KPC_PER_MYR_TO_KM_PER_S * psi.sin()
+            + p_psi * S_TO_MYR / r * KPC_TO_KM * psi.cos())
             * psi.sin())
     .powi(2)
-        + ((p_r / KM_PER_S_TO_KPC_PER_MYR * psi.cos()
-            - p_psi / MYR_TO_S / r / KM_TO_PC * psi.sin())
+        + ((p_r * KPC_PER_MYR_TO_KM_PER_S * psi.cos()
+            - p_psi * S_TO_MYR / r * KPC_TO_KM * psi.sin())
             * psi.sin()
-            + (p_r / KM_PER_S_TO_KPC_PER_MYR * psi.sin()
-                + p_psi / MYR_TO_S / r / KM_TO_PC * psi.cos())
+            + (p_r * KPC_PER_MYR_TO_KM_PER_S * psi.sin()
+                + p_psi * S_TO_MYR / r * KPC_TO_KM * psi.cos())
                 * psi.cos())
         .powi(2)
-        + (p_z / KM_PER_S_TO_KPC_PER_MYR).powi(2))
+        + (p_z * KPC_PER_MYR_TO_KM_PER_S).powi(2))
         / 2.0
         + phi(r, z) * 100.0
 }
-
-const KM_PER_S_TO_KPC_PER_MYR: F = 0.00102273;
-const HUNDREDS_KM_2_PER_S_2_TO_PC_2_PER_MYR: F = 1.04598e-4;
-const MYR_TO_S: F = 3.2e13;
-const KM_TO_PC: F = 3.240_779_289_666_4e-17;
 
 impl Orbit {
     /// Integrate the orbit with the specified
@@ -145,8 +151,23 @@ impl Orbit {
             + self.gca_initials.v * self.gcy_initials.psi.sin();
         self.gcy_initials.psi_vel = (-self.gca_initials.u * self.gcy_initials.psi.sin()
             + self.gca_initials.v * self.gcy_initials.psi.cos())
-            / (self.gcy_initials.r / KM_TO_PC);
+            / self.gcy_initials.r
+            * KM_TO_KPC;
         self.gcy_initials.z_vel = self.gca_initials.w;
+
+        // {
+        //     let r = 1.0;
+        //     let z = 0.0;
+        //     println!(
+        //         "vel: {}",
+        //         F::sqrt(
+        //             (plummer::phi_dr(r, z, M_B, B_B)
+        //                 + miyamoto_nagai::phi_dr(r, z, M_D, A_D, B_D)
+        //                 + navarro_frenk_white::phi_dr(r, z, M_H, A_H))
+        //                 * 100.0
+        //         )
+        //     );
+        // }
 
         // println!(
         //     "{}",
@@ -178,20 +199,75 @@ impl Orbit {
         // );
 
         // Prepare the vectors for the solutions
+
+        // Galactic Cylindrical system
         let mut r = Vec::<F>::with_capacity(n + 1);
         let mut psi = Vec::<F>::with_capacity(n + 1);
         let mut z = Vec::<F>::with_capacity(n + 1);
         let mut p_r = Vec::<F>::with_capacity(n + 1);
         let mut p_psi = Vec::<F>::with_capacity(n + 1);
         let mut p_z = Vec::<F>::with_capacity(n + 1);
+
+        // Galactic Cartesian system
+        let mut x = Vec::<F>::with_capacity(n + 1);
+        let mut y = Vec::<F>::with_capacity(n + 1);
+
+        // Total energy
         let mut e = Vec::<F>::with_capacity(n + 1);
+        let mut vel = Vec::<F>::with_capacity(n + 1);
+        let mut phi_v = Vec::<F>::with_capacity(n + 1);
+
+        // Push the initial values
+
+        // Galactic Cylindrical system
         r.push(self.gcy_initials.r);
         psi.push(self.gcy_initials.psi);
         z.push(self.gcy_initials.z);
         p_r.push(self.gcy_initials.r_vel * KM_PER_S_TO_KPC_PER_MYR);
         p_psi.push(self.gcy_initials.r.powi(2) * self.gcy_initials.psi_vel * MYR_TO_S);
         p_z.push(self.gcy_initials.z_vel * KM_PER_S_TO_KPC_PER_MYR);
+
+        // Galactic Cartesian system
+        x.push(r[0] * psi[0].cos());
+        y.push(r[0] * psi[0].sin());
+
+        // println!(
+        //     "gca:\n{}\n{}\n{}\n{}\n{}\n{}\ngcy:\n{}\n{}\n{}\n{}\n{}\n{}",
+        //     self.gca_initials.x,
+        //     self.gca_initials.y,
+        //     self.gca_initials.z,
+        //     self.gca_initials.u,
+        //     self.gca_initials.v,
+        //     self.gca_initials.w,
+        //     self.gcy_initials.r,
+        //     self.gcy_initials.psi,
+        //     self.gcy_initials.z,
+        //     self.gcy_initials.r_vel,
+        //     self.gcy_initials.psi_vel,
+        //     self.gcy_initials.z_vel,
+        // );
+
+        // Total energy
         e.push(total_energy(r[0], psi[0], z[0], p_r[0], p_psi[0], p_z[0]));
+        vel.push(
+            ((-(p_r[0] * KPC_PER_MYR_TO_KM_PER_S * psi[0].cos()
+                - p_psi[0] * S_TO_MYR / r[0] * KPC_TO_KM * psi[0].sin())
+                * psi[0].cos()
+                + (p_r[0] * KPC_PER_MYR_TO_KM_PER_S * psi[0].sin()
+                    + p_psi[0] * S_TO_MYR / r[0] * KPC_TO_KM * psi[0].cos())
+                    * psi[0].sin())
+            .powi(2)
+                + ((p_r[0] * KPC_PER_MYR_TO_KM_PER_S * psi[0].cos()
+                    - p_psi[0] * S_TO_MYR / r[0] * KPC_TO_KM * psi[0].sin())
+                    * psi[0].sin()
+                    + (p_r[0] * KPC_PER_MYR_TO_KM_PER_S * psi[0].sin()
+                        + p_psi[0] * S_TO_MYR / r[0] * KPC_TO_KM * psi[0].cos())
+                        * psi[0].cos())
+                .powi(2)
+                + (p_z[0] * KPC_PER_MYR_TO_KM_PER_S).powi(2))
+                / 2.0,
+        );
+        phi_v.push(phi_dz(r[0], z[0]));
 
         println!("\n{:1$}E at the start: {2:.16e}", "", PADDING + 2, e[0]);
 
@@ -245,35 +321,69 @@ impl Orbit {
 
             // println!(
             //     "{}",
-            //     ((-(p_r[i - 1] / KM_PER_S_TO_KPC_PER_MYR * psi[i - 1].cos()
-            //         - p_psi[i - 1] / MYR_TO_S / r[i - 1] / KM_TO_PC * psi[i - 1].sin())
+            //     ((-(p_r[i - 1] * KPC_PER_MYR_TO_KM_PER_S * psi[i - 1].cos()
+            //         - p_psi[i - 1] * S_TO_MYR / r[i - 1] / KM_TO_PC * psi[i - 1].sin())
             //         * psi[i - 1].cos()
-            //         + (p_r[i - 1] / KM_PER_S_TO_KPC_PER_MYR * psi[i - 1].sin()
-            //             + p_psi[i - 1] / MYR_TO_S / r[i - 1] / KM_TO_PC * psi[i - 1].cos())
+            //         + (p_r[i - 1] * KPC_PER_MYR_TO_KM_PER_S * psi[i - 1].sin()
+            //             + p_psi[i - 1] * S_TO_MYR / r[i - 1] / KM_TO_PC * psi[i - 1].cos())
             //             * psi[i - 1].sin())
             //     .powi(2)
-            //         + ((p_r[i - 1] / KM_PER_S_TO_KPC_PER_MYR * psi[i - 1].cos()
-            //             - p_psi[i - 1] / MYR_TO_S / r[i - 1] / KM_TO_PC * psi[i - 1].sin())
+            //         + ((p_r[i - 1] * KPC_PER_MYR_TO_KM_PER_S * psi[i - 1].cos()
+            //             - p_psi[i - 1] * S_TO_MYR / r[i - 1] / KM_TO_PC * psi[i - 1].sin())
             //             * psi[i - 1].sin()
-            //             + (p_r[i - 1] / KM_PER_S_TO_KPC_PER_MYR * psi[i - 1].sin()
-            //                 + p_psi[i - 1] / MYR_TO_S / r[i - 1] / KM_TO_PC * psi[i - 1].cos())
+            //             + (p_r[i - 1] * KPC_PER_MYR_TO_KM_PER_S * psi[i - 1].sin()
+            //                 + p_psi[i - 1] * S_TO_MYR / r[i - 1] / KM_TO_PC * psi[i - 1].cos())
             //                 * psi[i - 1].cos())
             //         .powi(2)
-            //         + (p_z[i - 1] / KM_PER_S_TO_KPC_PER_MYR).powi(2))
+            //         + (p_z[i - 1] * KPC_PER_MYR_TO_KM_PER_S).powi(2))
             //         / 2.0
             //         + phi(r[i - 1], z[i - 1]) * 100.0
             // );
 
+            // Calculate the next value
+
+            // Galactic Cylindrical system
             r.push(r[i - 1] + 1.0 / 6.0 * (k_r_1 + 2.0 * k_r_2 + 2.0 * k_r_3 + k_r_4));
             psi.push(psi[i - 1] + 1.0 / 6.0 * (k_psi_1 + 2.0 * k_psi_2 + 2.0 * k_psi_3 + k_psi_4));
             z.push(z[i - 1] + 1.0 / 6.0 * (k_z_1 + 2.0 * k_z_2 + 2.0 * k_z_3 + k_z_4));
             p_r.push(p_r[i - 1] + 1.0 / 6.0 * (k_p_r_1 + 2.0 * k_p_r_2 + 2.0 * k_p_r_3 + k_p_r_4));
             p_psi.push(p_psi[i - 1]);
             p_z.push(p_z[i - 1] + 1.0 / 6.0 * (k_p_z_1 + 2.0 * k_p_z_2 + 2.0 * k_p_z_3 + k_p_z_4));
-            e.push(total_energy(r[i], psi[i], z[i], p_r[i], p_psi[i], p_z[i]))
+
+            // Galactic Cartesian system
+            x.push(r[i] * psi[i].cos());
+            y.push(r[i] * psi[i].sin());
+
+            // Total energy
+            e.push(total_energy(r[i], psi[i], z[i], p_r[i], p_psi[i], p_z[i]));
+            vel.push(
+                ((-(p_r[i] * KPC_PER_MYR_TO_KM_PER_S * psi[i].cos()
+                    - p_psi[i] * S_TO_MYR / r[i] * KPC_TO_KM * psi[i].sin())
+                    * psi[i].cos()
+                    + (p_r[i] * KPC_PER_MYR_TO_KM_PER_S * psi[i].sin()
+                        + p_psi[i] * S_TO_MYR / r[i] * KPC_TO_KM * psi[i].cos())
+                        * psi[i].sin())
+                .powi(2)
+                    + ((p_r[i] * KPC_PER_MYR_TO_KM_PER_S * psi[i].cos()
+                        - p_psi[i] * S_TO_MYR / r[i] * KPC_TO_KM * psi[i].sin())
+                        * psi[i].sin()
+                        + (p_r[i] * KPC_PER_MYR_TO_KM_PER_S * psi[i].sin()
+                            + p_psi[i] * S_TO_MYR / r[i] * KPC_TO_KM * psi[i].cos())
+                            * psi[i].cos())
+                    .powi(2)
+                    + (p_z[i] * KPC_PER_MYR_TO_KM_PER_S).powi(2))
+                    / 2.0,
+            );
+            phi_v.push(phi_dz(r[i], z[i]));
         }
 
-        println!("{:1$}E at the end:   {2:.16e}\n", "", PADDING + 2, e[n]);
+        println!("{:1$}E at the end:   {2:.16e}", "", PADDING + 2, e[n]);
+        println!(
+            "{:1$}Emax - Emin:    {2:.16e}\n",
+            "",
+            PADDING + 2,
+            e.iter().copied().reduce(F::max).unwrap() - e.iter().copied().reduce(F::min).unwrap()
+        );
 
         // let system = LagrangianEquations {};
 
@@ -293,18 +403,49 @@ impl Orbit {
         //     Ok(_) => {
         //         let states = stepper.y_out();
         //         // Save the results
-        //         self.gcy_integrated.r = states.iter().map(|x| x[0]).collect();
-        //         self.gcy_integrated.psi = states.iter().map(|x| x[1]).collect();
-        //         self.gcy_integrated.z = states.iter().map(|x| x[2]).collect();
+        //         self.integrated.r = states.iter().map(|x| x[0]).collect();
+        //         self.integrated.psi = states.iter().map(|x| x[1]).collect();
+        //         self.integrated.z = states.iter().map(|x| x[2]).collect();
+        //         let p_r: Vec<F> = states.iter().map(|x| x[3]).collect();
+        //         let p_psi: Vec<F> = states.iter().map(|x| x[4]).collect();
+        //         let p_z: Vec<F> = states.iter().map(|x| x[5]).collect();
+        //         let mut e = Vec::<F>::with_capacity(n + 1);
+        //         let mut x = Vec::<F>::with_capacity(n + 1);
+        //         let mut y = Vec::<F>::with_capacity(n + 1);
+        //         for i in 0..=n {
+        //             e.push(total_energy(
+        //                 self.integrated.r[i],
+        //                 self.integrated.psi[i],
+        //                 self.integrated.z[i],
+        //                 p_r[i],
+        //                 p_psi[i],
+        //                 p_z[i],
+        //             ));
+        //             x.push(self.integrated.r[i] * self.integrated.psi[i].cos());
+        //             y.push(self.integrated.r[i] * self.integrated.psi[i].sin());
+        //         }
+        //         self.integrated.x = x;
+        //         self.integrated.y = y;
+        //         self.integrated.e = e;
         //     }
         //     Err(_) => eprintln!(":shrug:"),
         // }
 
-        // Save the results
+        // // Save the results
+
+        // Galactic Cylindrical system
         self.integrated.r = r;
         self.integrated.psi = psi;
         self.integrated.z = z;
+
+        // Galactic Cartesian system
+        self.integrated.x = x;
+        self.integrated.y = y;
+
+        // Total energy
         self.integrated.e = e;
+        self.integrated.vel = vel;
+        self.integrated.phi = phi_v;
     }
 }
 
