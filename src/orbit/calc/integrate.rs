@@ -42,17 +42,13 @@ const B_D: F = 0.3084;
 const A_H: F = 7.7;
 
 /// A constant to convert kpc/Myr to km/s
-const KPC_PER_MYR_TO_KM_PER_S: F = 977.775_320_024_919;
+const KPC_PER_MYR_TO_KM_PER_S: F = 977.812_299_895_122;
 /// A constant to convert km/s to kpc/Myr
 const KM_PER_S_TO_KPC_PER_MYR: F = 0.001_022_73;
 /// A constant to convert 100 km^2/s^2 to kpc^2/Myr^2
 const HUNDREDS_KM_2_PER_S_2_TO_KPC_2_PER_MYR_2: F = 1.045_897_218_694_908e-4;
-/// A constant to convert seconds to Myr
-const S_TO_MYR: F = 3.168_873_850_681_14e-14;
 /// A constant to convert Myr to seconds
 const MYR_TO_S: F = 3.155_695_2e13;
-/// A constant to convert kpc to km
-const KPC_TO_KM: F = 3.085_677_581_28e+16;
 /// A constant to convert km to kpc
 const KM_TO_KPC: F = 3.240_779_289_666_4e-17;
 
@@ -116,17 +112,18 @@ fn f_p_z(r: F, z: F) -> F {
 
 /// Calculate total energy (km^2 / s^2)
 fn total_energy(r: F, psi: F, z: F, p_r: F, p_psi: F, p_z: F) -> F {
-    ((-(p_r * KPC_PER_MYR_TO_KM_PER_S * psi.cos() - p_psi * S_TO_MYR / r * KPC_TO_KM * psi.sin())
+    ((-(p_r * KPC_PER_MYR_TO_KM_PER_S * psi.cos()
+        - p_psi / r * KPC_PER_MYR_TO_KM_PER_S * psi.sin())
         * psi.cos()
         + (p_r * KPC_PER_MYR_TO_KM_PER_S * psi.sin()
-            + p_psi * S_TO_MYR / r * KPC_TO_KM * psi.cos())
+            + p_psi / r * KPC_PER_MYR_TO_KM_PER_S * psi.cos())
             * psi.sin())
     .powi(2)
         + ((p_r * KPC_PER_MYR_TO_KM_PER_S * psi.cos()
-            - p_psi * S_TO_MYR / r * KPC_TO_KM * psi.sin())
+            - p_psi / r * KPC_PER_MYR_TO_KM_PER_S * psi.sin())
             * psi.sin()
             + (p_r * KPC_PER_MYR_TO_KM_PER_S * psi.sin()
-                + p_psi * S_TO_MYR / r * KPC_TO_KM * psi.cos())
+                + p_psi / r * KPC_PER_MYR_TO_KM_PER_S * psi.cos())
                 * psi.cos())
         .powi(2)
         + (p_z * KPC_PER_MYR_TO_KM_PER_S).powi(2))
@@ -262,17 +259,17 @@ impl Orbit {
         e.push(total_energy(r[0], psi[0], z[0], p_r[0], p_psi[0], p_z[0]));
         vel.push(
             ((-(p_r[0] * KPC_PER_MYR_TO_KM_PER_S * psi[0].cos()
-                - p_psi[0] * S_TO_MYR / r[0] * KPC_TO_KM * psi[0].sin())
+                - p_psi[0] / r[0] * KPC_PER_MYR_TO_KM_PER_S * psi[0].sin())
                 * psi[0].cos()
                 + (p_r[0] * KPC_PER_MYR_TO_KM_PER_S * psi[0].sin()
-                    + p_psi[0] * S_TO_MYR / r[0] * KPC_TO_KM * psi[0].cos())
+                    + p_psi[0] / r[0] * KPC_PER_MYR_TO_KM_PER_S * psi[0].cos())
                     * psi[0].sin())
             .powi(2)
                 + ((p_r[0] * KPC_PER_MYR_TO_KM_PER_S * psi[0].cos()
-                    - p_psi[0] * S_TO_MYR / r[0] * KPC_TO_KM * psi[0].sin())
+                    - p_psi[0] / r[0] * KPC_PER_MYR_TO_KM_PER_S * psi[0].sin())
                     * psi[0].sin()
                     + (p_r[0] * KPC_PER_MYR_TO_KM_PER_S * psi[0].sin()
-                        + p_psi[0] * S_TO_MYR / r[0] * KPC_TO_KM * psi[0].cos())
+                        + p_psi[0] / r[0] * KPC_PER_MYR_TO_KM_PER_S * psi[0].cos())
                         * psi[0].cos())
                 .powi(2)
                 + (p_z[0] * KPC_PER_MYR_TO_KM_PER_S).powi(2))
@@ -372,17 +369,17 @@ impl Orbit {
             e.push(total_energy(r[i], psi[i], z[i], p_r[i], p_psi[i], p_z[i]));
             vel.push(
                 ((-(p_r[i] * KPC_PER_MYR_TO_KM_PER_S * psi[i].cos()
-                    - p_psi[i] * S_TO_MYR / r[i] * KPC_TO_KM * psi[i].sin())
+                    - p_psi[i] / r[i] * KPC_PER_MYR_TO_KM_PER_S * psi[i].sin())
                     * psi[i].cos()
                     + (p_r[i] * KPC_PER_MYR_TO_KM_PER_S * psi[i].sin()
-                        + p_psi[i] * S_TO_MYR / r[i] * KPC_TO_KM * psi[i].cos())
+                        + p_psi[i] / r[i] * KPC_PER_MYR_TO_KM_PER_S * psi[i].cos())
                         * psi[i].sin())
                 .powi(2)
                     + ((p_r[i] * KPC_PER_MYR_TO_KM_PER_S * psi[i].cos()
-                        - p_psi[i] * S_TO_MYR / r[i] * KPC_TO_KM * psi[i].sin())
+                        - p_psi[i] / r[i] * KPC_PER_MYR_TO_KM_PER_S * psi[i].sin())
                         * psi[i].sin()
                         + (p_r[i] * KPC_PER_MYR_TO_KM_PER_S * psi[i].sin()
-                            + p_psi[i] * S_TO_MYR / r[i] * KPC_TO_KM * psi[i].cos())
+                            + p_psi[i] / r[i] * KPC_PER_MYR_TO_KM_PER_S * psi[i].cos())
                             * psi[i].cos())
                     .powi(2)
                     + (p_z[i] * KPC_PER_MYR_TO_KM_PER_S).powi(2))
