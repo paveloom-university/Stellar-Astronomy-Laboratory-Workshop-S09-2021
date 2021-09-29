@@ -4,7 +4,7 @@ use clap::Values;
 use csv::{ByteRecord, ReaderBuilder};
 use serde::Deserialize;
 
-use crate::orbit::{HeliocentricCartesianInitials, Orbit, F};
+use crate::orbit::{HCInitials, Orbit, F};
 
 /// A representation of the results after parsing the files
 pub struct Log<'a> {
@@ -16,34 +16,23 @@ pub struct Log<'a> {
     statuses: Vec<String>,
 }
 
+/// A representation of a file record
 #[derive(Deserialize)]
-struct Report<'a> {
+struct Record<'a> {
     /// ID of the object
     id: &'a str,
-    /// X coordinate (kpc)
+    /// X component of the radius vector (kpc)
     x_0: F,
-    /// Error of the X coordinate (kpc)
-    x_0_err: F,
-    /// Y coordinate
+    /// Y component of the radius vector (kpc)
     y_0: F,
-    /// Error of the Y coordinate (kpc)
-    y_0_err: F,
-    /// Z coordinate (kpc)
+    /// Z component of the radius vector (kpc)
     z_0: F,
-    /// Error of the Z coordinate (kpc)
-    z_0_err: F,
-    /// U velocity (kpc)
+    /// U component of the velocity vector (km/s)
     u_0: F,
-    /// Error of the U velocity (km s^{-1})
-    u_0_err: F,
-    /// V velocity (km s^{-1})
+    /// V component of the velocity vector (km/s)
     v_0: F,
-    /// Error of the V velocity (km s^{-1})
-    v_0_err: F,
-    /// W velocity (km s^{-1})
+    /// W component of the velocity vector (km/s)
     w_0: F,
-    /// Error of the W velocity (km s^{-1})
-    w_0_err: F,
 }
 
 impl Orbit {
@@ -80,10 +69,7 @@ impl Orbit {
                     // Put the appropriate status and skip this file
                     statuses.push("PF".to_string());
                 // Or, if the header isn't correct
-                } else if headers.as_slice()
-                    != &b"idx_0x_0_erry_0y_0_errz_0z_0_erru_0u_0_errv_0v_0_errw_0w_0_err"[..]
-                    || headers.len() != 13
-                {
+                } else if headers.as_slice() != &b"idx_0y_0z_0u_0v_0w_0"[..] || headers.len() != 7 {
                     // Put the appropriate status and skip this file
                     statuses.push("WH".to_string());
                 // Otherwise,
@@ -92,28 +78,23 @@ impl Orbit {
                     counter = 0;
                     // While there are records that could be read
                     loop {
+                        // Try to read a record
                         if let Ok(read) = rdr.read_byte_record(&mut record) {
                             // If a record was read successfully
                             if read {
-                                // If the record could be deserialized
-                                if let Ok(report) = record.deserialize::<Report>(Some(&headers)) {
-                                    // Save the ID of the object
-                                    // Create and save an orbit from initial coordinates and velocities
+                                // If the record could be deserialized, process
+                                // the results; otherwise, skip this line
+                                if let Ok(record) = record.deserialize::<Record>(Some(&headers)) {
+                                    // Use the data of the record to create and save an orbit
                                     orbits.push(Orbit::from(
-                                        report.id.to_string(),
-                                        HeliocentricCartesianInitials {
-                                            x: report.x_0,
-                                            x_err: report.x_0_err,
-                                            y: report.y_0,
-                                            y_err: report.y_0_err,
-                                            z: report.z_0,
-                                            z_err: report.z_0_err,
-                                            u: report.u_0,
-                                            u_err: report.u_0_err,
-                                            v: report.v_0,
-                                            v_err: report.v_0_err,
-                                            w: report.w_0,
-                                            w_err: report.w_0_err,
+                                        record.id.to_string(),
+                                        HCInitials {
+                                            x: record.x_0,
+                                            y: record.y_0,
+                                            z: record.z_0,
+                                            u: record.u_0,
+                                            v: record.v_0,
+                                            w: record.w_0,
                                         },
                                     ));
                                     counter += 1;

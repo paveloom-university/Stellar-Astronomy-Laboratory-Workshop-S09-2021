@@ -5,155 +5,107 @@
 
 use serde::Deserialize;
 
+use crate::{F, I};
+
 mod calc;
 mod io;
-
-/// The floating point type used for calculations
-type F = f64;
 
 /// Initial coordinates and velocities of a globular
 /// cluster in the Heliocentric Cartesian system
 #[derive(Deserialize)]
-pub struct HeliocentricCartesianInitials {
-    /// X coordinate (kpc)
+pub struct HCInitials {
+    /// X component of the radius vector (kpc)
     x: F,
-    /// Error of the X coordinate (kpc)
-    x_err: F,
-    /// Y coordinate
+    /// Y component of the radius vector (kpc)
     y: F,
-    /// Error of the Y coordinate (kpc)
-    y_err: F,
-    /// Z coordinate (kpc)
+    /// Z component of the radius vector (kpc)
     z: F,
-    /// Error of the Z coordinate (kpc)
-    z_err: F,
-    /// U velocity (kpc)
+    /// U component of the velocity vector (kpc)
     u: F,
-    /// Error of the U velocity (km s^{-1})
-    u_err: F,
-    /// V velocity (km s^{-1})
+    /// V component of the velocity vector (km/s)
     v: F,
-    /// Error of the V velocity (km s^{-1})
-    v_err: F,
-    /// W velocity (km s^{-1})
+    /// W component of the velocity vector (km/s)
     w: F,
-    /// Error of the W velocity (km s^{-1})
-    w_err: F,
 }
 
 /// Initial coordinates and velocities of a globular
 /// cluster in the Galactic Cartesian system
-pub struct GalacticCartesianInitials {
-    /// X coordinate (kpc)
+pub struct GCaInitials {
+    /// X component of the radius vector (kpc)
     x: F,
-    /// Error of the X coordinate (kpc)
-    x_err: F,
-    /// Y coordinate (kpc)
+    /// Y component of the radius vector (kpc)
     y: F,
-    /// Error of the Y coordinate (kpc)
-    y_err: F,
-    /// Z coordinate (kpc)
+    /// Z component of the radius vector (kpc)
     z: F,
-    /// Error of the Z coordinate (kpc)
-    z_err: F,
-    /// U velocity (km s^{-1})
+    /// U component of the velocity vector (km/s)
     u: F,
-    /// Error of the U velocity (km s^{-1})
-    u_err: F,
-    /// V velocity (km s^{-1})
+    /// V component of the velocity vector (km/s)
     v: F,
-    /// Error of the V velocity (km s^{-1})
-    v_err: F,
-    /// W velocity (km s^{-1})
+    /// W component of the velocity vector (km/s)
     w: F,
-    /// Error of the W velocity (km s^{-1})
-    w_err: F,
 }
 
-impl GalacticCartesianInitials {
+impl GCaInitials {
     /// Initialize a new struct with default values
     fn new() -> Self {
-        GalacticCartesianInitials {
+        Self {
             x: 0.0,
-            x_err: 0.0,
             y: 0.0,
-            y_err: 0.0,
             z: 0.0,
-            z_err: 0.0,
             u: 0.0,
-            u_err: 0.0,
             v: 0.0,
-            v_err: 0.0,
             w: 0.0,
-            w_err: 0.0,
         }
     }
 }
 
 /// Initial coordinates and velocities of a globular
 /// cluster in the Galactic Cylindrical system
-pub struct GalacticCylindricalInitials {
-    /// R coordinate (kpc)
+pub struct GCyInitials {
+    /// Radius (kpc)
     r: F,
-    /// Error of the R coordinate (kpc)
-    r_err: F,
-    /// $ \psi $ coordinate (radians)
+    /// Angle (rad)
     psi: F,
-    /// Error of the $ \psi $ coordinate (radians)
-    psi_err: F,
-    /// Z coordinate (kpc)
+    /// Height (kpc)
     z: F,
-    /// Error of the Z coordinate (kpc)
-    z_err: F,
-    /// R velocity (km s^{-1})
-    r_vel: F,
-    /// Error of the R velocity (km s^{-1})
-    r_vel_err: F,
-    /// $ \psi $ velocity (radians)
-    psi_vel: F,
-    /// Error of the $ \psi $ velocity (radians)
-    psi_vel_err: F,
-    /// Z velocity (km s^{-1})
-    z_vel: F,
-    /// Error of the Z velocity (km s^{-1})
-    z_vel_err: F,
+    /// Time derivative of R (km/s)
+    dr: F,
+    /// Angular velocity (rad/s)
+    dpsi: F,
+    /// Time derivative of Z (km/s)
+    dz: F,
 }
 
-impl GalacticCylindricalInitials {
+impl GCyInitials {
     /// Initialize a new struct with default values
     fn new() -> Self {
         Self {
             r: 0.0,
-            r_err: 0.0,
             psi: 0.0,
-            psi_err: 0.0,
             z: 0.0,
-            z_err: 0.0,
-            r_vel: 0.0,
-            r_vel_err: 0.0,
-            psi_vel: 0.0,
-            psi_vel_err: 0.0,
-            z_vel: 0.0,
-            z_vel_err: 0.0,
+            dr: 0.0,
+            dpsi: 0.0,
+            dz: 0.0,
         }
     }
 }
 
-/// Values integrated during runtime:
-/// - Coordinates of a globular cluster in the Galactic Cylindrical system
+/// Some of the values integrated during runtime
+///
+/// These include:
+/// - R and Z coordinates of a globular cluster in the Galactic Cylindrical system
+/// - X and Y coordinates of a globular cluster in the Galactic Cartesian system
 /// - Total energy
 pub struct Integrated {
-    /// R coordinate in the Galactic Cylindrical system (kpc)
+    /// R component of the radius vector in the Galactic Cylindrical system (kpc)
     r: Vec<F>,
-    /// $ \psi $ coordinate in the Galactic Cylindrical system (radians)
-    psi: Vec<F>,
-    /// Z coordinate in the Galactic Cylindrical system (kpc)
+    /// Z component of the radius vector in the Galactic Cylindrical system (kpc)
     z: Vec<F>,
-    /// X coordinate in the Galactic Cartesian system (kpc)
+    /// X component of the radius vector in the Galactic Cartesian system (kpc)
     x: Vec<F>,
-    /// Y coordinate in the Galactic Cartesian system (kpc)
+    /// Y component of the radius vector in the Galactic Cartesian system (kpc)
     y: Vec<F>,
-    /// Total energy (km^2 / s^2)
+    /// Total energy (km^2/s^2)
     e: Vec<F>,
     vel: Vec<F>,
     phi: Vec<F>,
@@ -164,7 +116,6 @@ impl Integrated {
     fn new() -> Self {
         Self {
             r: Vec::<F>::new(),
-            psi: Vec::<F>::new(),
             z: Vec::<F>::new(),
             x: Vec::<F>::new(),
             y: Vec::<F>::new(),
@@ -180,13 +131,13 @@ pub struct Orbit {
     /// ID of the object
     id: String,
     /// Initial coordinates and velocities in the Heliocentric Cartesian system
-    hc_initials: HeliocentricCartesianInitials,
+    hc_initials: HCInitials,
     /// Initial coordinates and velocities in the Galactic Cartesian system
-    gca_initials: GalacticCartesianInitials,
+    gca_initials: GCaInitials,
     /// Initial coordinates and velocities in the Galactic Cylindrical system
-    gcy_initials: GalacticCylindricalInitials,
+    gcy_initials: GCyInitials,
     /// Number of iterations used in the last integration
-    n: usize,
+    n: I,
     /// Integrated coordinates of a globular cluster in the Galactic Cylindrical system
     integrated: Integrated,
 }
@@ -194,12 +145,12 @@ pub struct Orbit {
 impl Orbit {
     /// Initialize an orbit with an ID from the initial coordinates
     /// and velocities in the Heliocentric Cartesian system
-    pub fn from(id: String, hc_initials: HeliocentricCartesianInitials) -> Self {
+    pub fn from(id: String, hc_initials: HCInitials) -> Self {
         Orbit {
             id,
             hc_initials,
-            gca_initials: GalacticCartesianInitials::new(),
-            gcy_initials: GalacticCylindricalInitials::new(),
+            gca_initials: GCaInitials::new(),
+            gcy_initials: GCyInitials::new(),
             n: 0,
             integrated: Integrated::new(),
         }

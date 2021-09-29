@@ -1,53 +1,59 @@
 //! Integrate the orbit
 
-use ode_solvers::{Rk4, *};
+// use ode_solvers::{Rk4, *};
 
 use super::potentials::{miyamoto_nagai, navarro_frenk_white, plummer};
-use crate::{
-    orbit::{Orbit, F},
-    PADDING,
-};
+use crate::{orbit::Orbit, F, I, PADDING};
 
-type State = Vector6<F>;
-type Time = F;
+// type State = Vector6<F>;
+// type Time = F;
 
 /// Galactocentric distance of the Local Standard
 /// of Rest around the Galactic center (kpc)
 const G_R_SUN: F = 8.3;
-
 /// Galactocentric linear velocity of the Local Standard
-/// of Rest around the Galactic center (km s^{-1})
+/// of Rest around the Galactic center (km/s)
 const G_V_SUN: F = 244.0;
-
 /// Height of the Sun above the Galactic plane (pc)
 const G_H_SUN: F = 16.0;
-
 /// The Sun’s peculiar velocity U with respect
-/// to the Local Standard of Rest (km s^{-1})
+/// to the Local Standard of Rest (km/s)
 const P_U_SUN: F = 11.1;
-
 /// The Sun’s peculiar velocity V with respect
-/// to the Local Standard of Rest (km s^{-1})
+/// to the Local Standard of Rest (km/s)
 const P_V_SUN: F = 12.2;
-
 /// The Sun’s peculiar velocity W with respect
-/// to the Local Standard of Rest (km s^{-1})
+/// to the Local Standard of Rest (km/s)
 const P_W_SUN: F = 7.3;
 
+/// `M` parameter of the Plummer potential
 const M_B: F = 443.0;
+/// `M` parameter of the Miyamoto & Nagai potential
 const M_D: F = 2798.0;
+/// `M` parameter of the Navarro-Frenk-White potential
 const M_H: F = 12474.0;
+/// `b` parameter of the Plummer potential
 const B_B: F = 0.2672;
+/// `a` parameter of the Miyamoto & Nagai potential
 const A_D: F = 4.40;
+/// `b` parameter of the Miyamoto & Nagai potential
 const B_D: F = 0.3084;
+/// `a` parameter of the Navarro-Frenk-White potential
 const A_H: F = 7.7;
 
+/// A constant to convert kpc/Myr to km/s
 const KPC_PER_MYR_TO_KM_PER_S: F = 977.775_320_024_919;
+/// A constant to convert km/s to kpc/Myr
 const KM_PER_S_TO_KPC_PER_MYR: F = 0.001_022_73;
+/// A constant to convert 100 km^2/s^2 to kpc^2/Myr^2
 const HUNDREDS_KM_2_PER_S_2_TO_KPC_2_PER_MYR_2: F = 1.045_897_218_694_908e-4;
+/// A constant to convert seconds to Myr
 const S_TO_MYR: F = 3.168_873_850_681_14e-14;
+/// A constant to convert Myr to seconds
 const MYR_TO_S: F = 3.155_695_2e13;
+/// A constant to convert kpc to km
 const KPC_TO_KM: F = 3.085_677_581_28e+16;
+/// A constant to convert km to kpc
 const KM_TO_KPC: F = 3.240_779_289_666_4e-17;
 
 // const TEST: F = 1.0282;
@@ -78,27 +84,32 @@ fn phi_dz(r: F, z: F) -> F {
     // * TEST
 }
 
-/// Calculate the right-hand part of the equation for r'
+/// Calculate the right-hand part of the
+/// equation for the time derivative of `r`
 fn f_r(p_r: F) -> F {
     p_r
 }
 
-/// Calculate the right-hand part of the equation for psi'
+/// Calculate the right-hand part of the
+/// equation for the time derivative of `psi`
 fn f_psi(r: F, p_psi: F) -> F {
     p_psi / r.powi(2)
 }
 
-/// Calculate the right-hand part of the equation for z'
+/// Calculate the right-hand part of the
+/// equation for the time derivative of `z`
 fn f_z(p_z: F) -> F {
     p_z
 }
 
-/// Calculate the right-hand part of the equation for p_r'
+/// Calculate the right-hand part of the
+/// equation for the time derivative of `p_r`
 fn f_p_r(r: F, z: F, p_psi: F) -> F {
     -phi_dr(r, z) + p_psi.powi(2) / r.powi(3)
 }
 
-/// Calculate the right-hand part of the equation for p_z'
+/// Calculate the right-hand part of the
+/// equation for the time derivative of `p_z`
 fn f_p_z(r: F, z: F) -> F {
     -phi_dz(r, z)
 }
@@ -125,9 +136,9 @@ fn total_energy(r: F, psi: F, z: F, p_r: F, p_psi: F, p_z: F) -> F {
 
 impl Orbit {
     /// Integrate the orbit with the specified
-    /// number of iteration `n` and the time step `h`
+    /// number of iterations `n` and the time step `h`
     /// using the fourth-order Runge-Kutta algorithm
-    pub fn integrate(&mut self, n: usize, h: F) {
+    pub fn integrate(&mut self, n: I, h: F) {
         // Save the number of integrations
         self.n = n;
 
@@ -147,13 +158,13 @@ impl Orbit {
         self.gcy_initials.r = (self.gca_initials.x.powi(2) + self.gca_initials.y.powi(2)).sqrt();
         self.gcy_initials.psi = self.gca_initials.y.atan2(self.gca_initials.x);
         self.gcy_initials.z = self.gca_initials.z;
-        self.gcy_initials.r_vel = self.gca_initials.u * self.gcy_initials.psi.cos()
+        self.gcy_initials.dr = self.gca_initials.u * self.gcy_initials.psi.cos()
             + self.gca_initials.v * self.gcy_initials.psi.sin();
-        self.gcy_initials.psi_vel = (-self.gca_initials.u * self.gcy_initials.psi.sin()
+        self.gcy_initials.dpsi = (-self.gca_initials.u * self.gcy_initials.psi.sin()
             + self.gca_initials.v * self.gcy_initials.psi.cos())
             / self.gcy_initials.r
             * KM_TO_KPC;
-        self.gcy_initials.z_vel = self.gca_initials.w;
+        self.gcy_initials.dz = self.gca_initials.w;
 
         // {
         //     let r = 1.0;
@@ -223,9 +234,9 @@ impl Orbit {
         r.push(self.gcy_initials.r);
         psi.push(self.gcy_initials.psi);
         z.push(self.gcy_initials.z);
-        p_r.push(self.gcy_initials.r_vel * KM_PER_S_TO_KPC_PER_MYR);
-        p_psi.push(self.gcy_initials.r.powi(2) * self.gcy_initials.psi_vel * MYR_TO_S);
-        p_z.push(self.gcy_initials.z_vel * KM_PER_S_TO_KPC_PER_MYR);
+        p_r.push(self.gcy_initials.dr * KM_PER_S_TO_KPC_PER_MYR);
+        p_psi.push(self.gcy_initials.r.powi(2) * self.gcy_initials.dpsi * MYR_TO_S);
+        p_z.push(self.gcy_initials.dz * KM_PER_S_TO_KPC_PER_MYR);
 
         // Galactic Cartesian system
         x.push(r[0] * psi[0].cos());
@@ -271,7 +282,7 @@ impl Orbit {
 
         println!("\n{:1$}E at the start: {2:.16e}", "", PADDING + 2, e[0]);
 
-        // Prepare buffers for the coefficients
+        // Prepare buffers for the increments
         let mut k_r_1: F;
         let mut k_r_2: F;
         let mut k_r_3: F;
@@ -295,6 +306,9 @@ impl Orbit {
 
         // Integrate the orbit using the fourth-order Runge-Kutta algorithm
         for i in 1..=n {
+            // Calculate the increments for all integrable variables
+            // (except for `p_psi`, since its derivative is 0)
+
             k_r_1 = h * f_r(p_r[i - 1]);
             k_psi_1 = h * f_psi(r[i - 1], p_psi[i - 1]);
             k_z_1 = h * f_z(p_z[i - 1]);
@@ -431,11 +445,10 @@ impl Orbit {
         //     Err(_) => eprintln!(":shrug:"),
         // }
 
-        // // Save the results
+        // Save the results
 
         // Galactic Cylindrical system
         self.integrated.r = r;
-        self.integrated.psi = psi;
         self.integrated.z = z;
 
         // Galactic Cartesian system

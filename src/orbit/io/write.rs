@@ -1,3 +1,5 @@
+//! Write the results of integration to the specified file
+
 use byteorder::{LittleEndian, WriteBytesExt};
 use std::{
     fs::{self, File},
@@ -37,7 +39,6 @@ impl Orbit {
 
             // Galactic Cylindrical system
             write_vector!(r);
-            write_vector!(e);
             write_vector!(z);
 
             // Galactic Cartesian system
