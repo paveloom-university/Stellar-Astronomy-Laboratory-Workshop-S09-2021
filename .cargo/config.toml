@@ -11,5 +11,7 @@ lint = [
      "-A",
      "clippy::similar_names",
      "-A",
-     "clippy::multiple_crate_versions"
+     "clippy::multiple_crate_versions",
+     "-A",
+     "clippy::doc_markdown"
 ]

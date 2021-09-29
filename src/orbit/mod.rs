@@ -14,34 +14,34 @@ mod io;
 /// cluster in the Heliocentric Cartesian system
 #[derive(Deserialize)]
 pub struct HCInitials {
-    /// X component of the radius vector (kpc)
+    /// X component of the radius vector $\[ \text{kpc} \]$
     x: F,
-    /// Y component of the radius vector (kpc)
+    /// Y component of the radius vector $\[ \text{kpc} \]$
     y: F,
-    /// Z component of the radius vector (kpc)
+    /// Z component of the radius vector $\[ \text{kpc} \]$
     z: F,
-    /// U component of the velocity vector (kpc)
+    /// U component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
     u: F,
-    /// V component of the velocity vector (km/s)
+    /// V component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
     v: F,
-    /// W component of the velocity vector (km/s)
+    /// W component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
     w: F,
 }
 
 /// Initial coordinates and velocities of a globular
 /// cluster in the Galactic Cartesian system
 pub struct GCaInitials {
-    /// X component of the radius vector (kpc)
+    /// X component of the radius vector $\[ \text{kpc} \]$
     x: F,
-    /// Y component of the radius vector (kpc)
+    /// Y component of the radius vector $\[ \text{kpc} \]$
     y: F,
-    /// Z component of the radius vector (kpc)
+    /// Z component of the radius vector $\[ \text{kpc} \]$
     z: F,
-    /// U component of the velocity vector (km/s)
+    /// U component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
     u: F,
-    /// V component of the velocity vector (km/s)
+    /// V component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
     v: F,
-    /// W component of the velocity vector (km/s)
+    /// W component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
     w: F,
 }
 
@@ -62,17 +62,17 @@ impl GCaInitials {
 /// Initial coordinates and velocities of a globular
 /// cluster in the Galactic Cylindrical system
 pub struct GCyInitials {
-    /// Radius (kpc)
+    /// Radius $\[ \text{kpc} \]$
     r: F,
-    /// Angle (rad)
+    /// Angle $\[ \text{rad} \]$
     psi: F,
-    /// Height (kpc)
+    /// Height $\[ \text{kpc} \]$
     z: F,
-    /// Time derivative of R (km/s)
+    /// Time derivative of R $\[ \text{km} \\, \text{s}^{-1} \]$
     dr: F,
-    /// Angular velocity (rad/s)
+    /// Angular velocity $\[ \text{rad} \\, \text{s}^{-1} \]$
     dpsi: F,
-    /// Time derivative of Z (km/s)
+    /// Time derivative of Z $\[ \text{km} \\, \text{s}^{-1} \]$
     dz: F,
 }
 
@@ -97,15 +97,15 @@ impl GCyInitials {
 /// - X and Y coordinates of a globular cluster in the Galactic Cartesian system
 /// - Total energy
 pub struct Integrated {
-    /// R component of the radius vector in the Galactic Cylindrical system (kpc)
+    /// R component of the radius vector in the Galactic Cylindrical system $\[ \text{kpc} \]$
     r: Vec<F>,
-    /// Z component of the radius vector in the Galactic Cylindrical system (kpc)
+    /// Z component of the radius vector in the Galactic Cylindrical system $\[ \text{kpc} \]$
     z: Vec<F>,
-    /// X component of the radius vector in the Galactic Cartesian system (kpc)
+    /// X component of the radius vector in the Galactic Cartesian system $\[ \text{kpc} \]$
     x: Vec<F>,
-    /// Y component of the radius vector in the Galactic Cartesian system (kpc)
+    /// Y component of the radius vector in the Galactic Cartesian system $\[ \text{kpc} \]$
     y: Vec<F>,
-    /// Total energy (km^2/s^2)
+    /// Total energy $\[ \text{km}^2 \\, \text{s}^{-2} \]$
     e: Vec<F>,
 }
 

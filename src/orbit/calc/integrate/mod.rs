@@ -3,126 +3,79 @@
 use super::potentials::{miyamoto_nagai, navarro_frenk_white, plummer};
 use crate::{orbit::Orbit, F, I, PADDING};
 
-/// Galactocentric distance of the Local Standard
-/// of Rest around the Galactic center (kpc)
-const G_R_SUN: F = 8.3;
-/// Galactocentric linear velocity of the Local Standard
-/// of Rest around the Galactic center (km/s)
-const G_V_SUN: F = 244.0;
-/// Height of the Sun above the Galactic plane (pc)
-const G_H_SUN: F = 16.0;
-/// The Sun’s peculiar velocity U with respect
-/// to the Local Standard of Rest (km/s)
-const P_U_SUN: F = 11.1;
-/// The Sun’s peculiar velocity V with respect
-/// to the Local Standard of Rest (km/s)
-const P_V_SUN: F = 12.2;
-/// The Sun’s peculiar velocity W with respect
-/// to the Local Standard of Rest (km/s)
-const P_W_SUN: F = 7.3;
+mod constants;
 
-/// `M` parameter of the Plummer potential
-const M_B: F = 443.0;
-/// `M` parameter of the Miyamoto & Nagai potential
-const M_D: F = 2798.0;
-/// `M` parameter of the Navarro-Frenk-White potential
-const M_H: F = 12474.0;
-/// `b` parameter of the Plummer potential
-const B_B: F = 0.2672;
-/// `a` parameter of the Miyamoto & Nagai potential
-const A_D: F = 4.40;
-/// `b` parameter of the Miyamoto & Nagai potential
-const B_D: F = 0.3084;
-/// `a` parameter of the Navarro-Frenk-White potential
-const A_H: F = 7.7;
+use constants::{conversion::Conversions, correction::Corrections};
 
-/// A constant to convert kpc/Myr to km/s
-const KPC_PER_MYR_TO_KM_PER_S: F = 977.812_299_895_122;
-/// A constant to convert km/s to kpc/Myr
-const KM_PER_S_TO_KPC_PER_MYR: F = 0.001_022_73;
-/// A constant to convert 100 km^2/s^2 to kpc^2/Myr^2
-const HUNDREDS_KM_2_PER_S_2_TO_KPC_2_PER_MYR_2: F = 1.045_897_218_694_908e-4;
-/// A constant to convert Myr to seconds
-const MYR_TO_S: F = 3.155_695_2e13;
-/// A constant to convert km to kpc
-const KM_TO_KPC: F = 3.240_779_289_666_4e-17;
-
-/// Calculate the value of the Galactic potential (100 * km^2/s^2)
+/// Calculate the value of the Galactic potential $ \Phi(R, Z) $
+/// $\[ 100 \\, \text{km}^2 \\, \text{s}^{-2} \]$
 fn phi(r: F, z: F) -> F {
-    plummer::phi(r, z, M_B, B_B)
-        + miyamoto_nagai::phi(r, z, M_D, A_D, B_D)
-        + navarro_frenk_white::phi(r, z, M_H, A_H)
+    plummer::phi(r, z) + miyamoto_nagai::phi(r, z) + navarro_frenk_white::phi(r, z)
 }
 
-/// Calculate the value of the R derivative of the Galactic potential (kpc/Myr^2)
+/// Calculate the value of $ \partial \Phi(R, Z) / \partial R $
+/// $\[ \text{kpc} \\, \text{Myr}^{-2} \]$
 fn phi_dr(r: F, z: F) -> F {
-    (plummer::phi_dr(r, z, M_B, B_B)
-        + miyamoto_nagai::phi_dr(r, z, M_D, A_D, B_D)
-        + navarro_frenk_white::phi_dr(r, z, M_H, A_H))
-        * HUNDREDS_KM_2_PER_S_2_TO_KPC_2_PER_MYR_2
+    (plummer::phi_dr(r, z) + miyamoto_nagai::phi_dr(r, z) + navarro_frenk_white::phi_dr(r, z))
+        .to_kpc_per_myr_2()
 }
 
-/// Calculate the value of the Z derivative of the Galactic potential (kpc/Myr^2)
+/// Calculate the value of $ \partial \Phi(R, Z) / \partial Z $
+/// $\[ \text{kpc} \\, \text{Myr}^{-2} \]$
 fn phi_dz(r: F, z: F) -> F {
-    (plummer::phi_dz(r, z, M_B, B_B)
-        + miyamoto_nagai::phi_dz(r, z, M_D, A_D, B_D)
-        + navarro_frenk_white::phi_dz(r, z, M_H, A_H))
-        * HUNDREDS_KM_2_PER_S_2_TO_KPC_2_PER_MYR_2
+    (plummer::phi_dz(r, z) + miyamoto_nagai::phi_dz(r, z) + navarro_frenk_white::phi_dz(r, z))
+        .to_kpc_per_myr_2()
 }
 
-/// Calculate the right-hand part of the
-/// equation for the time derivative of `r`
+/// Calculate the right-hand part of the equation for
+/// $ \dot{R} $ $\[ \text{kpc} \\, \text{Myr}^{-1} \]$
 fn f_r(p_r: F) -> F {
     p_r
 }
 
-/// Calculate the right-hand part of the
-/// equation for the time derivative of `psi`
+/// Calculate the right-hand part of the equation for
+/// $ \dot{\psi} $ $\[ \text{Myr}^{-1} \]$
 fn f_psi(r: F, p_psi: F) -> F {
     p_psi / r.powi(2)
 }
 
-/// Calculate the right-hand part of the
-/// equation for the time derivative of `z`
+/// Calculate the right-hand part of the equation for
+/// $ \dot{z} $ $\[ \text{kpc} \\, \text{Myr}^{-1} \]$
 fn f_z(p_z: F) -> F {
     p_z
 }
 
-/// Calculate the right-hand part of the
-/// equation for the time derivative of `p_r`
+/// Calculate the right-hand part of the equation for
+/// $ \dot{p_r} $ $\[ \text{kpc} \\, \text{Myr}^{-2} \]$
 fn f_p_r(r: F, z: F, p_psi: F) -> F {
     -phi_dr(r, z) + p_psi.powi(2) / r.powi(3)
 }
 
-/// Calculate the right-hand part of the
-/// equation for the time derivative of `p_z`
+/// Calculate the right-hand part of the equation for
+/// $ \dot{p_z} $ $\[ \text{kpc} \\, \text{Myr}^{-2} \]$
 fn f_p_z(r: F, z: F) -> F {
     -phi_dz(r, z)
 }
 
-/// Calculate radial velocity (km/s) using integrable variables
+/// Calculate the value of radial velocity
+/// $ \Pi $ $\[ \text{km} \\, \text{s}^{-1} \]$
 fn radial_velocity(r: F, psi: F, p_r: F, p_psi: F) -> F {
-    -(p_r * KPC_PER_MYR_TO_KM_PER_S * psi.cos() - p_psi / r * KPC_PER_MYR_TO_KM_PER_S * psi.sin())
-        * psi.cos()
-        + (p_r * KPC_PER_MYR_TO_KM_PER_S * psi.sin()
-            + p_psi / r * KPC_PER_MYR_TO_KM_PER_S * psi.cos())
-            * psi.sin()
+    -(p_r.to_km_per_s() * psi.cos() - (p_psi / r).to_km_per_s() * psi.sin()) * psi.cos()
+        + (p_r.to_km_per_s() * psi.sin() + (p_psi / r).to_km_per_s() * psi.cos()) * psi.sin()
 }
 
-/// Calculate tangential velocity (km/s) using integrable variables
+/// Calculate the value of tangential velocity
+/// $ \Theta $ $\[ \text{km} \\, \text{s}^{-1} \]$
 fn tangential_velocity(r: F, psi: F, p_r: F, p_psi: F) -> F {
-    (p_r * KPC_PER_MYR_TO_KM_PER_S * psi.cos() - p_psi / r * KPC_PER_MYR_TO_KM_PER_S * psi.sin())
-        * psi.sin()
-        + (p_r * KPC_PER_MYR_TO_KM_PER_S * psi.sin()
-            + p_psi / r * KPC_PER_MYR_TO_KM_PER_S * psi.cos())
-            * psi.cos()
+    (p_r.to_km_per_s() * psi.cos() - (p_psi / r).to_km_per_s() * psi.sin()) * psi.sin()
+        + (p_r.to_km_per_s() * psi.sin() + (p_psi / r).to_km_per_s() * psi.cos()) * psi.cos()
 }
 
-/// Calculate total energy (km^2 / s^2) using integrable variables
+/// Calculate total energy E $\[ \text{km}^2 \\, \text{s}^{-2} \]$
 fn total_energy(r: F, psi: F, z: F, p_r: F, p_psi: F, p_z: F) -> F {
     (radial_velocity(r, psi, p_r, p_psi).powi(2)
         + tangential_velocity(r, psi, p_r, p_psi).powi(2)
-        + (p_z * KPC_PER_MYR_TO_KM_PER_S).powi(2))
+        + p_z.to_km_per_s().powi(2))
         / 2.0
         + phi(r, z) * 100.0
 }
@@ -138,12 +91,12 @@ impl Orbit {
         // Convert the initial coordinates and velocities
         // from the Heliocentric Cartesian system to the
         // Galactic Cartesian system
-        self.gca_initials.x = G_R_SUN - self.hc_initials.x;
+        self.gca_initials.x = self.hc_initials.x.to_gca_x();
         self.gca_initials.y = self.hc_initials.y;
-        self.gca_initials.z = self.hc_initials.z + G_H_SUN / 1000.0;
-        self.gca_initials.u = self.hc_initials.u + P_U_SUN;
-        self.gca_initials.v = self.hc_initials.v + P_V_SUN + G_V_SUN;
-        self.gca_initials.w = self.hc_initials.w + P_W_SUN;
+        self.gca_initials.z = self.hc_initials.z.to_gca_z();
+        self.gca_initials.u = self.hc_initials.u.to_gca_u();
+        self.gca_initials.v = self.hc_initials.v.to_gca_v();
+        self.gca_initials.w = self.hc_initials.w.to_gca_w();
 
         // Convert the initial coordinates and velocities
         // from the Galactic Cartesian system to the
@@ -153,10 +106,10 @@ impl Orbit {
         self.gcy_initials.z = self.gca_initials.z;
         self.gcy_initials.dr = self.gca_initials.u * self.gcy_initials.psi.cos()
             + self.gca_initials.v * self.gcy_initials.psi.sin();
-        self.gcy_initials.dpsi = (-self.gca_initials.u * self.gcy_initials.psi.sin()
+        self.gcy_initials.dpsi = ((-self.gca_initials.u * self.gcy_initials.psi.sin()
             + self.gca_initials.v * self.gcy_initials.psi.cos())
-            / self.gcy_initials.r
-            * KM_TO_KPC;
+            / self.gcy_initials.r)
+            .to_kpc();
         self.gcy_initials.dz = self.gca_initials.w;
 
         // Prepare the vectors for the solutions
@@ -182,9 +135,9 @@ impl Orbit {
         r.push(self.gcy_initials.r);
         psi.push(self.gcy_initials.psi);
         z.push(self.gcy_initials.z);
-        p_r.push(self.gcy_initials.dr * KM_PER_S_TO_KPC_PER_MYR);
-        p_psi.push(self.gcy_initials.r.powi(2) * self.gcy_initials.dpsi * MYR_TO_S);
-        p_z.push(self.gcy_initials.dz * KM_PER_S_TO_KPC_PER_MYR);
+        p_r.push(self.gcy_initials.dr.to_kpc_per_myr());
+        p_psi.push((self.gcy_initials.r.powi(2) * self.gcy_initials.dpsi).to_seconds());
+        p_z.push(self.gcy_initials.dz.to_kpc_per_myr());
 
         // Galactic Cartesian system
         x.push(r[0] * psi[0].cos());
