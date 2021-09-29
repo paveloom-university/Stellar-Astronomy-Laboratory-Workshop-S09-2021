@@ -107,8 +107,6 @@ pub struct Integrated {
     y: Vec<F>,
     /// Total energy (km^2/s^2)
     e: Vec<F>,
-    vel: Vec<F>,
-    phi: Vec<F>,
 }
 
 impl Integrated {
@@ -120,8 +118,6 @@ impl Integrated {
             x: Vec::<F>::new(),
             y: Vec::<F>::new(),
             e: Vec::<F>::new(),
-            vel: Vec::<F>::new(),
-            phi: Vec::<F>::new(),
         }
     }
 }

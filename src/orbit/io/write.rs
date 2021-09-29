@@ -47,8 +47,6 @@ impl Orbit {
 
             // Total energy
             write_vector!(e);
-            write_vector!(vel);
-            write_vector!(phi);
         }
     }
 }

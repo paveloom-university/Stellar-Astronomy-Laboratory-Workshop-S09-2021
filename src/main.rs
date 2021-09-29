@@ -3,12 +3,9 @@
 //! and choosing a model of the Galaxy potential. It is based on the paper
 //! of Bajkova and Bobylev ([2020, v1](https://arxiv.org/abs/2008.13624v1)).
 
-use clap::{crate_authors, crate_description, crate_name, crate_version, App, AppSettings, Arg};
-use std::{
-    ffi::OsString,
-    path::{Path, PathBuf},
-};
+use std::path::PathBuf;
 
+mod cli;
 mod orbit;
 
 use orbit::Orbit;
@@ -24,92 +21,8 @@ const PADDING: usize = 5;
 
 /// Run the program
 fn main() {
-    // Define the CLI
-    let matches = clap::app_from_crate!()
-        .help_message("Print help information")
-        .version_message("Print version information")
-        .after_help("Documentation: ???\nReference: ???")
-        .args(&[
-            Arg::with_name("n")
-                .help("Set the number of iterations")
-                .short("n")
-                .long("iterations")
-                .takes_value(true)
-                .empty_values(false)
-                .required(true)
-                .validator_os(|s| {
-                    s.to_str().map_or(
-                        Err(OsString::from("Argument isn't a valid UTF-8 string.")),
-                        |sl| {
-                            if sl.chars().all(|c| c.is_numeric() || c == '-') {
-                                if sl.parse::<I>().is_ok() {
-                                    Ok(())
-                                } else {
-                                    Err(OsString::from("Argument isn't a positive integer."))
-                                }
-                            } else {
-                                Err(OsString::from("Argument isn't numeric."))
-                            }
-                        },
-                    )
-                }),
-            Arg::with_name("h")
-                .help("Set the time step (in Myr)")
-                .short("h")
-                .long("step")
-                .takes_value(true)
-                .empty_values(false)
-                .required(true)
-                .validator_os(|s| {
-                    s.to_str().map_or(
-                        Err(OsString::from("Argument isn't a valid UTF-8 string.")),
-                        |sl| {
-                            if sl.chars().all(|c| {
-                                c.is_numeric() || c == '-' || c == '.' || c == 'e' || c == 'E'
-                            }) {
-                                if sl.parse::<F>().is_ok() {
-                                    Ok(())
-                                } else {
-                                    Err(OsString::from("Argument isn't a float number."))
-                                }
-                            } else {
-                                Err(OsString::from("Argument isn't numeric."))
-                            }
-                        },
-                    )
-                }),
-            Arg::with_name("output")
-                .help("Set the output directory to use")
-                .short("o")
-                .long("output")
-                .takes_value(true)
-                .empty_values(false)
-                .required(true)
-                .validator_os(|s| {
-                    if Path::new(s).is_dir() {
-                        Ok(())
-                    } else {
-                        Err(OsString::from(format!("\nNo such dir {:#?}.", s)))
-                    }
-                }),
-            Arg::with_name("file(s)")
-                .help("Set the input file(s) to use")
-                .multiple(true)
-                .required(true)
-                .validator_os(|s| {
-                    if Path::new(s).is_file() {
-                        Ok(())
-                    } else {
-                        Err(OsString::from(format!("\nNo such file {:#?}.", s)))
-                    }
-                }),
-        ])
-        .settings(&[
-            AppSettings::AllowNegativeNumbers,
-            AppSettings::ArgRequiredElseHelp,
-            AppSettings::TrailingVarArg,
-        ])
-        .get_matches();
+    // Define the CLI of the program, get the matched arguments
+    let matches = cli::get_matches();
 
     // Get the number of iterations
     let n = matches.value_of("n").unwrap().parse::<I>().unwrap();
