@@ -7,7 +7,7 @@ use serde::Deserialize;
 
 use crate::{F, I};
 
-mod calc;
+pub mod calc;
 mod io;
 
 /// Initial coordinates and velocities of a globular
@@ -141,6 +141,7 @@ pub struct Orbit {
 impl Orbit {
     /// Initialize an orbit with an ID from the initial coordinates
     /// and velocities in the Heliocentric Cartesian system
+    #[must_use]
     pub fn from(id: String, hc_initials: HCInitials) -> Self {
         Orbit {
             id,
@@ -152,6 +153,7 @@ impl Orbit {
         }
     }
     /// Get the ID of the object
+    #[must_use]
     pub fn id(&self) -> &String {
         &self.id
     }

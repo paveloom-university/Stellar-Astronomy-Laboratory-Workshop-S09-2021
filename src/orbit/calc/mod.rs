@@ -1,4 +1,4 @@
 //! This module provides the calculation routines
 
-mod integrate;
-mod potentials;
+pub mod integrate;
+pub mod potentials;

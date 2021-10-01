@@ -40,6 +40,7 @@ impl Orbit {
     ///
     /// Return all of the proper orbits found in the file(s) and
     /// the log of status codes.
+    #[must_use]
     pub fn load(files: Values) -> (Vec<Orbit>, Log) {
         // Get the length of files
         let len = files.len();

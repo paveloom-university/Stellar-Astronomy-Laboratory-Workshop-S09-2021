@@ -10,16 +10,19 @@ const A: F = 4.40;
 const B: F = 0.3084;
 
 /// Calculate the value of the Miyamoto & Nagai potential
+#[must_use]
 pub fn phi(r: F, z: F) -> F {
     -M / (r.powi(2) + (A + (z.powi(2) + B.powi(2)).sqrt()).powi(2)).sqrt()
 }
 
 /// Calculate the value of the R derivative of the Miyamoto & Nagai potential
+#[must_use]
 pub fn phi_dr(r: F, z: F) -> F {
     M * r / (r.powi(2) + (A + (z.powi(2) + B.powi(2)).sqrt()).powi(2)).powf(1.5)
 }
 
 /// Calculate the value of the Z derivative of the Miyamoto & Nagai potential
+#[must_use]
 pub fn phi_dz(r: F, z: F) -> F {
     let k_1 = (z.powi(2) + B.powi(2)).sqrt();
     let k_2 = A + k_1;

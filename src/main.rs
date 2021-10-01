@@ -1,12 +1,18 @@
 //! This binary crate is a command-line utility to integrate the orbits of
 //! globular clusters by providing their initial positions and velocities
 //! and choosing a model of the Galaxy potential. It is based on the paper
-//! of Bajkova and Bobylev ([2020, v1](https://arxiv.org/abs/2008.13624v1)).
+//! of Bajkova & Bobylev ([2020, v1](https://arxiv.org/abs/2008.13624v1)).
+//!
+//! Module documentations:
+//! - [Description of the units conversions before and
+//! after the integration](crate::orbit::calc::integrate)
+//! - [A list of available potentials and their
+//! derivatives](crate::orbit::calc::potentials)
 
 use std::path::PathBuf;
 
 mod cli;
-mod orbit;
+pub mod orbit;
 
 use orbit::Orbit;
 

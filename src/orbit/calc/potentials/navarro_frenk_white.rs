@@ -8,12 +8,14 @@ const M: F = 12474.0;
 const A: F = 7.7;
 
 /// Calculate the value of the Navarro-Frenk-White potential
+#[must_use]
 pub fn phi(r: F, z: F) -> F {
     let dist = (r.powi(2) + z.powi(2)).sqrt();
     -M / dist * F::ln(1.0 + dist / A)
 }
 
 /// Calculate the value of the R derivative of the Navarro-Frenk-White potential
+#[must_use]
 pub fn phi_dr(r: F, z: F) -> F {
     let sq_sum = r.powi(2) + z.powi(2);
     let dist = sq_sum.sqrt();
@@ -22,6 +24,7 @@ pub fn phi_dr(r: F, z: F) -> F {
 }
 
 /// Calculate the value of the Z derivative of the Navarro-Frenk-White potential
+#[must_use]
 pub fn phi_dz(r: F, z: F) -> F {
     let sq_sum = r.powi(2) + z.powi(2);
     let dist = sq_sum.sqrt();

@@ -1,7 +1,104 @@
 //! Integrate the orbit
+//!
+//! Here is a quick breakdown of what is going on (see
+//! Bajkova & Bobylev ([2020, v1](https://arxiv.org/abs/2008.13624v1))
+//! for more details).
+//!
+//! Let the initial positions and space velocities of a
+//! test particle in the heliocentric coordinate system be
+//! $ (x_0, y_0 , z_0, u_0, v_0 , w_0) $. The initial positions
+//! $ (X, Y, Z) $ and velocities $ (U, V, W) $ of the test
+//! particle in Galactic Cartesian coordinates are then given
+//! by the formulas:
+//!
+//! $$
+//! X \\, [\text{kpc}] = R_\odot - x_0; \\\\
+//! Y \\, [\text{kpc}] = y_0; \\\\
+//! Z \\, [\text{kpc}] = z_0 + h_\odot; \\\\
+//! U \\, [\text{km} \\, \text{s}^{-1}] = u_0 + u_\odot; \\\\
+//! V \\, [\text{km} \\, \text{s}^{-1}] = v_0 + v_\odot + V_\odot; \\\\
+//! W \\, [\text{km} \\, \text{s}^{-1}] = w_0 + w_\odot,
+//! $$
+//!
+//! where $ R_\odot = 8.3 \\, \text{kpc} $ and $ V_\odot = 244 \\,
+//! \text{km} \\, \text{s}^{-1} $ are the Galactocentric distance
+//! and the linear velocity of the Local Standard of Rest around
+//! the Galactic center, $ h_\odot = 16 \\, \text{pc} $ (Bobylev &
+//! Bajkova (2016)) is the height of the Sun above the Galactic plane.
+//!
+//! The initial positions $ (R, \psi, Z) $ and their time derivatives
+//! $ (\dot{R}, \dot{\psi}, \dot{Z}) $ are then obtained by the
+//! formulas:
+//!
+//! $$
+//! R \\, [\text{kpc}] = \sqrt{X^2 + Y^2}; \\\\
+//! \psi \\, [\text{rad}] = \text{atan2}(Y, X); \\\\
+//! \dot{R} \\, [\text{km} \\, \text{s}^{-1}] = U \cos{\psi} + V \sin{\psi}; \\\\
+//! \dot{\psi} \\, [\text{rad} \\, \text{s}^{-1}] = (-U \sin{\psi} + V \cos{\psi})
+//! / R \\, [\text{kpc} \rightarrow \text{km}]; \\\\
+//! \dot{Z} \\, [\text{km} \\, \text{s}^{-1}] = W.
+//! $$
+//!
+//! From here we obtain the initial values of the canonical moments
+//! $ (p_R, p_\psi, p_Z) $:
+//!
+//! $$
+//! p_R \\, [\text{kpc} \\, \text{Myr}^{-1}] = \dot{R} \\, [\text{km} \\, \text{s}^{-1}
+//! \rightarrow \text{kpc} \\, \text{Myr}^{-1}]; \\\\
+//! p_{\psi} \\, [\text{kpc}^2 \\, \text{rad} \\, \text{Myr}^{-1}] = R^2 \dot{\psi} \\, [\text{s}^{-1}
+//! \rightarrow \text{Myr}^{-1}]; \\\\
+//! p_Z \\, [\text{kpc} \\, \text{Myr}^{-1}] = \dot{Z} \\, [\text{km} \\, \text{s}^{-1}
+//! \rightarrow \text{kpc} \\, \text{Myr}^{-1}].
+//! $$
+//!
+//! Now we're all set to integrate the Lagrangian equations
+//!
+//! $$
+//! \dot{R} \\, [\text{kpc} \\, \text{Myr}^{-1}] = p_R; \\\\
+//! \dot{\psi} \\, [\text{rad} \\, \text{Myr}^{-1}] = p_\psi / R^2; \\\\
+//! \dot{Z} \\, [\text{kpc} \\, \text{Myr}^{-1}] = p_Z; \\\\
+//! \dot{p_R} \\, [\text{kpc} \\, \text{Myr}^{-2}] = - \partial \Phi(R, Z) / \partial R
+//! \\, [100 \\, \text{km} \\, \text{s}^{-2} \rightarrow \text{kpc} \\, \text{Myr}^{-2}]
+//! + p_\psi^2 / R^3; \\\\
+//! \dot{p_\psi} \\, [\text{kpc}^2 \\, \text{Myr}^{-2}] = 0; \\\\
+//! \dot{p_Z} \\, [\text{kpc} \\, \text{Myr}^{-2}] = - \partial \Phi(R, Z) / \partial Z
+//! \\, [100 \\, \text{km} \\, \text{s}^{-2} \rightarrow \text{kpc} \\, \text{Myr}^{-2}].
+//! $$
+//!
+//! To calculate the total energy, we first obtain radial velocity
+//!
+//! $$
+//! \Pi \\, [\text{km} \\, \text{s}^{-1}] = -U \frac{X}{R} + V \frac{Y}{R} =
+//! -(p_r \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
+//! \cos{\psi} - (p_\psi / r) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
+//! \text{s}^{-1}] \sin{\psi}) \cos{\psi} \\\\
+//! + (p_r \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
+//! \sin{\psi} - (p_\psi / r) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
+//! \text{s}^{-1}] \cos{\psi}) \sin{\psi},
+//! $$
+//!
+//! tangential velocity
+//!
+//! $$
+//! \Theta \\, [\text{km} \\, \text{s}^{-1}] = U \frac{Y}{R} + V \frac{X}{R} =
+//! (p_r \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
+//! \cos{\psi} - (p_\psi / r) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
+//! \text{s}^{-1}] \sin{\psi}) \sin{\psi} \\\\
+//! + (p_r \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
+//! \sin{\psi} - (p_\psi / r) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
+//! \text{s}^{-1}] \cos{\psi}) \cos{\psi},
+//! $$
+//!
+//! and total 3D velocity $ V_\text{tot} \\, [\text{km}^2 \\, \text{s}^{-2}] =
+//! \sqrt{\Pi^2 + \Theta^2 + W^2} = \sqrt{\Pi^2 + \Theta^2 + (p_z \\, [\text{kpc} \\,
+//! \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}])^2} $.
+//!
+//! Then we can calculate the total energy $ E \\, [\text{km}^2 \\, \text{s}^{-2}] =
+//! \Phi(R, Z) \\, [\text{km}^2 \\, \text{s}^{-2} \rightarrow \text{100} \\,
+//! \text{km}^2 \\, \text{s}^{-2}] + V_\text{tot}^2 / 2 $.
 
 use super::potentials::{miyamoto_nagai, navarro_frenk_white, plummer};
-use crate::{orbit::Orbit, F, I, PADDING};
+use crate::{orbit::Orbit, F, I};
 
 mod constants;
 
@@ -71,7 +168,7 @@ fn tangential_velocity(r: F, psi: F, p_r: F, p_psi: F) -> F {
         + (p_r.to_km_per_s() * psi.sin() + (p_psi / r).to_km_per_s() * psi.cos()) * psi.cos()
 }
 
-/// Calculate total energy E $\[ \text{km}^2 \\, \text{s}^{-2} \]$
+/// Calculate the value of total energy E $\[ \text{km}^2 \\, \text{s}^{-2} \]$
 fn total_energy(r: F, psi: F, z: F, p_r: F, p_psi: F, p_z: F) -> F {
     (radial_velocity(r, psi, p_r, p_psi).powi(2)
         + tangential_velocity(r, psi, p_r, p_psi).powi(2)
@@ -146,8 +243,6 @@ impl Orbit {
         // Total energy
         e.push(total_energy(r[0], psi[0], z[0], p_r[0], p_psi[0], p_z[0]));
 
-        println!("\n{:1$}E at the start: {2:.16e}", "", PADDING + 2, e[0]);
-
         // Prepare buffers for the increments
         let mut k_r_1: F;
         let mut k_r_2: F;
@@ -216,14 +311,6 @@ impl Orbit {
             // Total energy
             e.push(total_energy(r[i], psi[i], z[i], p_r[i], p_psi[i], p_z[i]));
         }
-
-        println!("{:1$}E at the end:   {2:.16e}", "", PADDING + 2, e[n]);
-        println!(
-            "{:1$}Emax - Emin:    {2:.16e}\n",
-            "",
-            PADDING + 2,
-            e.iter().copied().reduce(F::max).unwrap() - e.iter().copied().reduce(F::min).unwrap()
-        );
 
         // Save the results
 
