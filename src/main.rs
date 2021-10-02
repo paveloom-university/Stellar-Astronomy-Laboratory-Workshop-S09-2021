@@ -38,6 +38,8 @@ fn main() {
     let output = PathBuf::from(matches.value_of("output").unwrap());
     // Get values of the input files
     let files = matches.values_of("file(s)").unwrap();
+    // Get switch value of the reverse mode
+    let rev = matches.occurrences_of("rev") == 1;
 
     println!("\n{:1$}> Parsing the files...", "", PADDING);
 
@@ -53,6 +55,9 @@ fn main() {
         println!("{:1$}> One orbit was parsed.\n", "", PADDING);
         println!("{:1$}h = {2}", "", PADDING + 2, h);
         println!("{:1$}n = {2}\n", "", PADDING + 2, n);
+        if rev {
+            println!("{:1$}Reverse mode enabled.\n", "", PADDING + 2);
+        }
     } else {
         println!(
             "{:1$}> {2} orbits were parsed.\n",
@@ -62,6 +67,9 @@ fn main() {
         );
         println!("{:1$}h = {2}", "", PADDING + 2, h);
         println!("{:1$}n = {2}\n", "", PADDING + 2, n);
+        if rev {
+            println!("{:1$}Reverse mode enabled.\n", "", PADDING + 2);
+        }
     }
 
     // Integrate each orbit and write the results
@@ -72,7 +80,9 @@ fn main() {
             PADDING,
             orbit.id()
         );
-        orbit.integrate(n, h);
+        orbit.integrate(n, h, rev);
         orbit.write(&output);
     }
+
+    println!();
 }

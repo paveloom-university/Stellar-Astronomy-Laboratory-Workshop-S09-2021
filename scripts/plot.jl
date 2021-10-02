@@ -18,6 +18,16 @@ n = 500000
 # Define the step used in the input data
 h = -0.01
 
+# Define if reverse mode was used
+rev = false
+
+# Define postfix for names of files
+postfix = if length(ARGS) > 0
+    " ($(ARGS[1]))"
+else
+    ""
+end
+
 # For each path in the output directory
 for path in readdir("$(@__DIR__)/../data/output"; join=true)
     # Check if the path is a directory
@@ -58,24 +68,38 @@ for path in readdir("$(@__DIR__)/../data/output"; join=true)
             println(" "^4, "> Plotting the data from \"$(name)\"...")
 
             # Plot the orbit in the RZ-plane
-            p = plot(r[1:100:end], z[1:100:end]; label="", title=name, xlabel="R", ylabel="Z");
+            p = plot(
+                r[1:100:end],
+                z[1:100:end];
+                label="",
+                title=name,
+                xlabel=L"R \; [\mathrm{kpc}]",
+                ylabel=L"Z \; [\mathrm{kpc}]"
+            );
 
             # Point out the starting position
             scatter!(p, [r[1],], [z[1],]; label="");
 
             # Save the figure as PDF and PNG
-            savefig(p, joinpath(output_dir, "$(name) (Orbit, RZ).pdf"))
-            savefig(p, joinpath(output_dir, "$(name) (Orbit, RZ).png"))
+            savefig(p, joinpath(output_dir, "$(name) (Orbit, RZ)$(postfix).pdf"))
+            savefig(p, joinpath(output_dir, "$(name) (Orbit, RZ)$(postfix).png"))
 
             # Plot the orbit in the XY-plane
-            p = plot(x[1:100:end], y[1:100:end]; label="", title=name, xlabel="X", ylabel="Y");
+            p = plot(
+                x[1:100:end],
+                y[1:100:end];
+                label="",
+                title=name,
+                xlabel=L"X \; [\mathrm{kpc}]",
+                ylabel=L"Y \;\, [\mathrm{kpc}]"
+            );
 
             # Point out the starting position
             scatter!(p, [x[1],], [y[1],]; label="");
 
             # Save the figure as PDF and PNG
-            savefig(p, joinpath(output_dir, "$(name) (Orbit, XY).pdf"))
-            savefig(p, joinpath(output_dir, "$(name) (Orbit, XY).png"))
+            savefig(p, joinpath(output_dir, "$(name) (Orbit, XY)$(postfix).pdf"))
+            savefig(p, joinpath(output_dir, "$(name) (Orbit, XY)$(postfix).png"))
 
             # Plot the total energy over time
             p = plot(
@@ -83,33 +107,16 @@ for path in readdir("$(@__DIR__)/../data/output"; join=true)
                 e[1:100:end];
                 label="",
                 title=name,
-                xlabel=L"T, Gyr",
-                ylabel=L"E, km^2/s^2"
+                xlabel=L"T \;\, [\mathrm{Gyr}]",
+                ylabel=L"E \; [\mathrm{km^2 \, s^{-2}}]"
             );
 
             # Point out the initial value
             scatter!(p, [0.0,], [e[1],]; label="");
 
             # Save the figure as PDF and PNG
-            savefig(p, joinpath(output_dir, "$(name) (Total energy).pdf"))
-            savefig(p, joinpath(output_dir, "$(name) (Total energy).png"))
-
-            # Plot the R coordinate over time
-            p = plot(
-                0.0:(h * 100 / 1000):(h * (length(e) - 1) / 1000),
-                r[1:100:end];
-                label="",
-                title=name,
-                xlabel=L"T, Gyr",
-                ylabel=L"R, kpc"
-            );
-
-            # Point out the initial value
-            scatter!(p, [0.0,], [r[1],]; label="");
-
-            # Save the figure as PDF and PNG
-            savefig(p, joinpath(output_dir, "$(name) (R).pdf"))
-            savefig(p, joinpath(output_dir, "$(name) (R).png"))
+            savefig(p, joinpath(output_dir, "$(name) (Total energy)$(postfix).pdf"))
+            savefig(p, joinpath(output_dir, "$(name) (Total energy)$(postfix).png"))
         end
     end
 end

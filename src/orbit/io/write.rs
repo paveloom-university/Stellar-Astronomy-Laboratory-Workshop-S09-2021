@@ -28,7 +28,7 @@ impl Orbit {
                     if let Ok(mut f) =
                         File::create(object_dir.join(format!("{}.bin", stringify!($field))))
                     {
-                        for v in &self.integrated.$field {
+                        for v in &self.results.$field {
                             f.write_f64::<LittleEndian>(*v).ok();
                         }
                     }
@@ -37,9 +37,13 @@ impl Orbit {
 
             // Write the results
 
-            // Galactic Cylindrical system
+            // Lagrangian equations
             write_vector!(r);
+            write_vector!(psi);
             write_vector!(z);
+            write_vector!(p_r);
+            write_vector!(p_psi);
+            write_vector!(p_z);
 
             // Galactic Cartesian system
             write_vector!(x);

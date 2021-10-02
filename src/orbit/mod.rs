@@ -64,7 +64,7 @@ impl GCaInitials {
 pub struct GCyInitials {
     /// Radius $\[ \text{kpc} \]$
     r: F,
-    /// Angle $\[ \text{rad} \]$
+    /// Azimuth $\[ \text{rad} \]$
     psi: F,
     /// Height $\[ \text{kpc} \]$
     z: F,
@@ -90,17 +90,20 @@ impl GCyInitials {
     }
 }
 
-/// Some of the values integrated during runtime
-///
-/// These include:
-/// - R and Z coordinates of a globular cluster in the Galactic Cylindrical system
-/// - X and Y coordinates of a globular cluster in the Galactic Cartesian system
-/// - Total energy
-pub struct Integrated {
-    /// R component of the radius vector in the Galactic Cylindrical system $\[ \text{kpc} \]$
+/// Values integrated and calculated during runtime
+pub struct Results {
+    /// Radius in the Galactic Cylindrical system $\[ \text{kpc} \]$
     r: Vec<F>,
-    /// Z component of the radius vector in the Galactic Cylindrical system $\[ \text{kpc} \]$
+    /// Azimuth in the Galactic Cylindrical system $\[ \text{kpc} \]$
+    psi: Vec<F>,
+    /// Height in the Galactic Cartesian / Cylindrical system $\[ \text{kpc} \]$
     z: Vec<F>,
+    /// Momentum canonically conjugate to the radius $\[ \text{kpc} \\, \text{Myr}^{-1} \]$
+    p_r: Vec<F>,
+    /// Momentum canonically conjugate to the azimuth $\[ \text{kpc}^2 \\, \text{rad} \\, \text{Myr}^{-1} \]$
+    p_psi: Vec<F>,
+    /// Momentum canonically conjugate to the height $\[ \text{kpc} \\, \text{Myr}^{-1} \]$
+    p_z: Vec<F>,
     /// X component of the radius vector in the Galactic Cartesian system $\[ \text{kpc} \]$
     x: Vec<F>,
     /// Y component of the radius vector in the Galactic Cartesian system $\[ \text{kpc} \]$
@@ -109,12 +112,16 @@ pub struct Integrated {
     e: Vec<F>,
 }
 
-impl Integrated {
+impl Results {
     /// Initialize a new struct with default values
     fn new() -> Self {
         Self {
             r: Vec::<F>::new(),
+            psi: Vec::<F>::new(),
             z: Vec::<F>::new(),
+            p_r: Vec::<F>::new(),
+            p_psi: Vec::<F>::new(),
+            p_z: Vec::<F>::new(),
             x: Vec::<F>::new(),
             y: Vec::<F>::new(),
             e: Vec::<F>::new(),
@@ -135,7 +142,7 @@ pub struct Orbit {
     /// Number of iterations used in the last integration
     n: I,
     /// Integrated coordinates of a globular cluster in the Galactic Cylindrical system
-    integrated: Integrated,
+    results: Results,
 }
 
 impl Orbit {
@@ -149,7 +156,7 @@ impl Orbit {
             gca_initials: GCaInitials::new(),
             gcy_initials: GCyInitials::new(),
             n: 0,
-            integrated: Integrated::new(),
+            results: Results::new(),
         }
     }
     /// Get the ID of the object
