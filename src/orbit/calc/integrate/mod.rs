@@ -69,8 +69,8 @@
 //!
 //! $$
 //! \Pi \\, [\text{km} \\, \text{s}^{-1}] = -U \frac{X}{R} + V \frac{Y}{R} =
-//! -(p_r \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
-//! \cos{\psi} - (p_\psi / r) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
+//! -(-p_r \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
+//! \cos{\psi} + (p_\psi / r) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
 //! \text{s}^{-1}] \sin{\psi}) \cos{\psi} \\\\
 //! + (p_r \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
 //! \sin{\psi} - (p_\psi / r) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
@@ -81,8 +81,8 @@
 //!
 //! $$
 //! \Theta \\, [\text{km} \\, \text{s}^{-1}] = U \frac{Y}{R} + V \frac{X}{R} =
-//! (p_r \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
-//! \cos{\psi} - (p_\psi / r) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
+//! (-p_r \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
+//! \cos{\psi} + (p_\psi / r) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
 //! \text{s}^{-1}] \sin{\psi}) \sin{\psi} \\\\
 //! + (p_r \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
 //! \sin{\psi} - (p_\psi / r) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
