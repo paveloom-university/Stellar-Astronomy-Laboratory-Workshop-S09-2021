@@ -157,14 +157,14 @@ fn f_p_z(r: F, z: F) -> F {
 /// Calculate the value of radial velocity
 /// $ \Pi $ $\[ \text{km} \\, \text{s}^{-1} \]$
 fn radial_velocity(r: F, psi: F, p_r: F, p_psi: F) -> F {
-    -(p_r.to_km_per_s() * psi.cos() - (p_psi / r).to_km_per_s() * psi.sin()) * psi.cos()
+    -(-p_r.to_km_per_s() * psi.cos() + (p_psi / r).to_km_per_s() * psi.sin()) * psi.cos()
         + (p_r.to_km_per_s() * psi.sin() + (p_psi / r).to_km_per_s() * psi.cos()) * psi.sin()
 }
 
 /// Calculate the value of tangential velocity
 /// $ \Theta $ $\[ \text{km} \\, \text{s}^{-1} \]$
 fn tangential_velocity(r: F, psi: F, p_r: F, p_psi: F) -> F {
-    (p_r.to_km_per_s() * psi.cos() - (p_psi / r).to_km_per_s() * psi.sin()) * psi.sin()
+    (-p_r.to_km_per_s() * psi.cos() + (p_psi / r).to_km_per_s() * psi.sin()) * psi.sin()
         + (p_r.to_km_per_s() * psi.sin() + (p_psi / r).to_km_per_s() * psi.cos()) * psi.cos()
 }
 
