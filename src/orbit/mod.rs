@@ -10,146 +10,194 @@ use crate::{F, I};
 pub mod calc;
 mod io;
 
+/// Create a struct with a common fields type
+macro_rules! def_struct {
+    (
+        $(#[$attr:meta])*
+        $vis:vis struct $name:ident($type:ty) {
+            $(
+                #[$field_doc:meta]
+                $field:ident,
+            )*
+        }
+    ) => {
+        $(#[$attr])*
+        $vis struct $name {
+            $(
+                #[$field_doc]
+                $field: $type,
+            )*
+        }
+    }
+}
+
+/// Create a struct with a common fields type and a default initializer
+macro_rules! init_struct {
+    (
+        $(#[$attr:meta])*
+        $vis:vis struct $name:ident($type:ty, $expr:expr) {
+            $(
+                #[$field_doc:meta]
+                $field:ident,
+            )*
+        }
+    ) => {
+        $(#[$attr])*
+        $vis struct $name {
+            $(
+                #[$field_doc]
+                $field: $type,
+            )*
+        }
+
+        impl $name {
+            /// Initialize a new struct with default values
+            fn new() -> Self {
+                Self {
+                    $(
+                        $field: $expr,
+                    )*
+                }
+            }
+        }
+    }
+}
+
+/// Create a struct with a common fields type, a default initializer,
+/// and a method to get fields as static string slices
+macro_rules! fields_struct {
+    (
+        $(#[$attr:meta])*
+        $vis:vis struct $name:ident($type:ty, $expr:expr) {
+            $(
+                #[$field_doc:meta]
+                $field:ident,
+            )*
+        }
+    ) => {
+        $(#[$attr])*
+        $vis struct $name {
+            $(
+                #[$field_doc]
+                $field: $type,
+            )*
+        }
+
+        impl $name {
+            /// Initialize a new struct with default values
+            fn new() -> Self {
+                Self {
+                    $(
+                        $field: $expr,
+                    )*
+                }
+            }
+            /// Get the fields of the struct as static string slices
+            #[must_use]
+            pub fn fields() -> &'static [&'static str] {
+                static NAMES: &'static [&'static str] = &[$(stringify!($field)),*];
+                NAMES
+            }
+        }
+    }
+}
+
+def_struct! {
 /// Initial coordinates and velocities of a globular
 /// cluster in the Heliocentric Cartesian system
 #[derive(Deserialize)]
-pub struct HCInitials {
+pub struct HCInitials(F) {
     /// X component of the radius vector $\[ \text{kpc} \]$
-    x: F,
+    x,
     /// Standard deviation of the X component of the radius vector $\[ \text{kpc} \]$
-    x_err: F,
+    x_err,
     /// Y component of the radius vector $\[ \text{kpc} \]$
-    y: F,
+    y,
     /// Standard deviation of the Y component of the radius vector $\[ \text{kpc} \]$
-    y_err: F,
+    y_err,
     /// Z component of the radius vector $\[ \text{kpc} \]$
-    z: F,
+    z,
     /// Standard deviation of the Z component of the radius vector $\[ \text{kpc} \]$
-    z_err: F,
+    z_err,
     /// U component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
-    u: F,
+    u,
     /// Standard deviation of the U component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
-    u_err: F,
+    u_err,
     /// V component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
-    v: F,
+    v,
     /// Standard deviation of the V component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
-    v_err: F,
+    v_err,
     /// W component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
-    w: F,
+    w,
     /// Standard deviation of the W component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
-    w_err: F,
+    w_err,
+}
 }
 
+init_struct! {
 /// Initial coordinates and velocities of a globular
 /// cluster in the Galactic Cartesian system
-pub struct GCaInitials {
+pub struct GCaInitials(F, 0.0) {
     /// X component of the radius vector $\[ \text{kpc} \]$
-    x: F,
+    x,
     /// Y component of the radius vector $\[ \text{kpc} \]$
-    y: F,
+    y,
     /// Z component of the radius vector $\[ \text{kpc} \]$
-    z: F,
+    z,
     /// U component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
-    u: F,
+    u,
     /// V component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
-    v: F,
+    v,
     /// W component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
-    w: F,
+    w,
+}
 }
 
-impl GCaInitials {
-    /// Initialize a new struct with default values
-    fn new() -> Self {
-        Self {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-            u: 0.0,
-            v: 0.0,
-            w: 0.0,
-        }
-    }
-}
-
+init_struct! {
 /// Initial coordinates and velocities of a globular
 /// cluster in the Galactic Cylindrical system
-pub struct GCyInitials {
+pub struct GCyInitials(F, 0.0) {
     /// Radius $\[ \text{kpc} \]$
-    r: F,
+    r,
     /// Azimuth $\[ \text{rad} \]$
-    psi: F,
+    psi,
     /// Height $\[ \text{kpc} \]$
-    z: F,
+    z,
     /// Time derivative of R $\[ \text{km} \\, \text{s}^{-1} \]$
-    dr: F,
+    dr,
     /// Angular velocity $\[ \text{rad} \\, \text{s}^{-1} \]$
-    dpsi: F,
+    dpsi,
     /// Time derivative of Z $\[ \text{km} \\, \text{s}^{-1} \]$
-    dz: F,
+    dz,
+}
 }
 
-impl GCyInitials {
-    /// Initialize a new struct with default values
-    fn new() -> Self {
-        Self {
-            r: 0.0,
-            psi: 0.0,
-            z: 0.0,
-            dr: 0.0,
-            dpsi: 0.0,
-            dz: 0.0,
-        }
-    }
-}
-
-/// Fields in the [`Results`] struct. This constant is used in the CLI
-pub const RESULTS_FIELDS: &[&str] = &[
-    "r", "psi", "z", "p_r", "p_psi", "p_z", "x", "y", "e", "apo", "peri",
-];
-
+fields_struct! {
 /// Values integrated / calculated during runtime
-pub struct Results {
+pub struct Results(Vec<F>, Vec::<F>::new()) {
     /// Radius in the Galactic Cylindrical system $\[ \text{kpc} \]$
-    r: Vec<F>,
+    r,
     /// Azimuth in the Galactic Cylindrical system $\[ \text{kpc} \]$
-    psi: Vec<F>,
+    psi,
     /// Height in the Galactic Cartesian / Cylindrical system $\[ \text{kpc} \]$
-    z: Vec<F>,
+    z,
     /// Momentum canonically conjugate to the radius $\[ \text{kpc} \\, \text{Myr}^{-1} \]$
-    p_r: Vec<F>,
+    p_r,
     /// Momentum canonically conjugate to the azimuth $\[ \text{kpc}^2 \\, \text{rad} \\, \text{Myr}^{-1} \]$
-    p_psi: Vec<F>,
+    p_psi,
     /// Momentum canonically conjugate to the height $\[ \text{kpc} \\, \text{Myr}^{-1} \]$
-    p_z: Vec<F>,
+    p_z,
     /// X component of the radius vector in the Galactic Cartesian system $\[ \text{kpc} \]$
-    x: Vec<F>,
+    x,
     /// Y component of the radius vector in the Galactic Cartesian system $\[ \text{kpc} \]$
-    y: Vec<F>,
+    y,
     /// Total energy $\[ \text{km}^2 \\, \text{s}^{-2} \]$
-    e: Vec<F>,
+    e,
     /// Apocentric distance $\[ \text{kpc} \]$
-    apo: Vec<F>,
+    apo,
     /// Pericentric distance $\[ \text{kpc} \]$
-    peri: Vec<F>,
+    peri,
 }
-
-impl Results {
-    /// Initialize a new struct with default values
-    fn new() -> Self {
-        Self {
-            r: Vec::<F>::new(),
-            psi: Vec::<F>::new(),
-            z: Vec::<F>::new(),
-            p_r: Vec::<F>::new(),
-            p_psi: Vec::<F>::new(),
-            p_z: Vec::<F>::new(),
-            x: Vec::<F>::new(),
-            y: Vec::<F>::new(),
-            e: Vec::<F>::new(),
-            apo: Vec::<F>::new(),
-            peri: Vec::<F>::new(),
-        }
-    }
 }
 
 /// An orbit of a globular cluster

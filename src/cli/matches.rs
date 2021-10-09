@@ -5,7 +5,7 @@ use clap::{
 };
 use std::{ffi::OsString, path::Path};
 
-use crate::{orbit::RESULTS_FIELDS, F, I};
+use crate::{orbit::Results, F, I};
 
 /// Define the `n` argument
 fn n() -> Arg<'static, 'static> {
@@ -129,7 +129,7 @@ fn fields() -> Arg<'static, 'static> {
         .empty_values(false)
         .required(true)
         .require_delimiter(true)
-        .possible_values(RESULTS_FIELDS)
+        .possible_values(Results::fields())
         .hide_possible_values(true)
 }
 
