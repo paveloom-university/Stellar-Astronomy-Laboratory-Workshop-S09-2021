@@ -80,10 +80,13 @@ for path in readdir("$(@__DIR__)/../data/output"; join=true)
 
             println(" "^4, "> Plotting the data from \"$(name)\"...")
 
+            # Calculate the number of bins
+            bins = ceil(Int, (maximum(apo) - minimum(apo)) / (3.49 * std(apo) / s^(1 / 3)) * 1.5)
+
             # Plot the histogram of the apocentric distances
             p = histogram(
                 apo;
-                bins=:scott,
+                bins,
                 label="",
                 title=name,
                 xlabel=L"r_a \; [\mathrm{kpc}]",
@@ -97,10 +100,13 @@ for path in readdir("$(@__DIR__)/../data/output"; join=true)
             savefig(p, joinpath(output_dir, "$(name) (Apocentric distances)$(postfix).pdf"))
             savefig(p, joinpath(output_dir, "$(name) (Apocentric distances)$(postfix).png"))
 
+            # Calculate the number of bins
+            bins = ceil(Int, (maximum(peri) - minimum(peri)) / (3.49 * std(peri) / s^(1 / 3)) * 1.5)
+
             # Plot the histogram of the pericentric distances
             p = histogram(
                 peri;
-                bins=:scott,
+                bins,
                 label="",
                 title=name,
                 xlabel=L"r_p \; [\mathrm{kpc}]",

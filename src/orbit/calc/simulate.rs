@@ -53,12 +53,12 @@ impl Orbit {
         let mut rng = Xoshiro256PlusPlus::seed_from_u64(1);
 
         // Initialize the Normal distributions
-        let normal_x = Normal::new(self.hc_initials.x, self.hc_initials.x_err / 3.0).unwrap();
-        let normal_y = Normal::new(self.hc_initials.y, self.hc_initials.y_err / 3.0).unwrap();
-        let normal_z = Normal::new(self.hc_initials.z, self.hc_initials.z_err / 3.0).unwrap();
-        let normal_u = Normal::new(self.hc_initials.u, self.hc_initials.u_err / 3.0).unwrap();
-        let normal_v = Normal::new(self.hc_initials.v, self.hc_initials.v_err / 3.0).unwrap();
-        let normal_w = Normal::new(self.hc_initials.w, self.hc_initials.w_err / 3.0).unwrap();
+        let normal_x = Normal::new(self.hc_initials.x, self.hc_initials.x_err).unwrap();
+        let normal_y = Normal::new(self.hc_initials.y, self.hc_initials.y_err).unwrap();
+        let normal_z = Normal::new(self.hc_initials.z, self.hc_initials.z_err).unwrap();
+        let normal_u = Normal::new(self.hc_initials.u, self.hc_initials.u_err).unwrap();
+        let normal_v = Normal::new(self.hc_initials.v, self.hc_initials.v_err).unwrap();
+        let normal_w = Normal::new(self.hc_initials.w, self.hc_initials.w_err).unwrap();
 
         // Prepare the results vectors
         self.results.apo = Vec::<F>::with_capacity(s + 1);
