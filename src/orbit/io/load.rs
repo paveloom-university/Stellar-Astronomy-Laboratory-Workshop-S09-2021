@@ -1,6 +1,5 @@
 //! Try to load the file with initial positions and velocities
 
-use clap::Values;
 use csv::{ByteRecord, ReaderBuilder};
 use serde::Deserialize;
 
@@ -21,18 +20,30 @@ pub struct Log<'a> {
 struct Record<'a> {
     /// ID of the object
     id: &'a str,
-    /// X component of the radius vector (kpc)
+    /// X component of the radius vector $\[ \text{kpc} \]$
     x_0: F,
-    /// Y component of the radius vector (kpc)
+    /// Standard deviation of the X component of the radius vector $\[ \text{kpc} \]$
+    x_0_err: F,
+    /// Y component of the radius vector $\[ \text{kpc} \]$
     y_0: F,
-    /// Z component of the radius vector (kpc)
+    /// Standard deviation of the Y component of the radius vector $\[ \text{kpc} \]$
+    y_0_err: F,
+    /// Z component of the radius vector $\[ \text{kpc} \]$
     z_0: F,
-    /// U component of the velocity vector (km/s)
+    /// Standard deviation of the Z component of the radius vector $\[ \text{kpc} \]$
+    z_0_err: F,
+    /// U component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
     u_0: F,
-    /// V component of the velocity vector (km/s)
+    /// Standard deviation of the U component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
+    u_0_err: F,
+    /// V component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
     v_0: F,
-    /// W component of the velocity vector (km/s)
+    /// Standard deviation of the V component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
+    v_0_err: F,
+    /// W component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
     w_0: F,
+    /// Standard deviation of the W component of the velocity vector $\[ \text{km} \\, \text{s}^{-1} \]$
+    w_0_err: F,
 }
 
 impl Orbit {
@@ -41,10 +52,9 @@ impl Orbit {
     /// Return all of the proper orbits found in the file(s) and
     /// the log of status codes.
     #[must_use]
-    pub fn load(files: Values) -> (Vec<Orbit>, Log) {
+    pub fn load(files: Vec<&str>) -> (Vec<Orbit>, Log) {
         // Get the length of files
         let len = files.len();
-        let files: Vec<&str> = files.collect();
 
         // Prepare an array of orbits
         let mut orbits = Vec::<Orbit>::new();
@@ -70,7 +80,10 @@ impl Orbit {
                     // Put the appropriate status and skip this file
                     statuses.push("PF".to_string());
                 // Or, if the header isn't correct
-                } else if headers.as_slice() != &b"idx_0y_0z_0u_0v_0w_0"[..] || headers.len() != 7 {
+                } else if headers.as_slice()
+                    != &b"idx_0x_0_erry_0y_0_errz_0z_0_erru_0u_0_errv_0v_0_errw_0w_0_err"[..]
+                    || headers.len() != 13
+                {
                     // Put the appropriate status and skip this file
                     statuses.push("WH".to_string());
                 // Otherwise,
@@ -91,11 +104,17 @@ impl Orbit {
                                         record.id.to_string(),
                                         HCInitials {
                                             x: record.x_0,
+                                            x_err: record.x_0_err,
                                             y: record.y_0,
+                                            y_err: record.y_0_err,
                                             z: record.z_0,
+                                            z_err: record.z_0_err,
                                             u: record.u_0,
+                                            u_err: record.u_0_err,
                                             v: record.v_0,
+                                            v_err: record.v_0_err,
                                             w: record.w_0,
+                                            w_err: record.w_0_err,
                                         },
                                     ));
                                     counter += 1;

@@ -2,3 +2,4 @@
 
 pub mod integrate;
 pub mod potentials;
+pub mod simulate;

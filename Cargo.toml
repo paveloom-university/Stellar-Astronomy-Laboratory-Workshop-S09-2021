@@ -21,5 +21,7 @@ panic = 'abort'
 byteorder = "=1.4.3"
 clap = "=2.33.3"
 csv = "=1.1.6"
-ode_solvers = "=0.3.4"
+rand = "=0.8.4"
+rand_distr = "=0.4.2"
+rand_xoshiro = "=0.6.0"
 serde = {version = "=1.0.130", features = ["derive"]}

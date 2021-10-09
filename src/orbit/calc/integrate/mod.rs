@@ -320,9 +320,9 @@ impl Orbit {
             .to_kpc();
         self.gcy_initials.dz = self.gca_initials.w;
 
-        // Prepare the vectors for the solutions
+        // Prepare the results vectors
 
-        // Lagrangian equations
+        // Solutions of the Lagrangian equations
         self.results.r = Vec::<F>::with_capacity(self.n + 1);
         self.results.psi = Vec::<F>::with_capacity(self.n + 1);
         self.results.z = Vec::<F>::with_capacity(self.n + 1);
@@ -339,7 +339,7 @@ impl Orbit {
 
         // Push the initial values
 
-        // Lagrangian equations
+        // Solutions of the Lagrangian equations
         self.results.r.push(self.gcy_initials.r);
         self.results.psi.push(self.gcy_initials.psi);
         self.results.z.push(self.gcy_initials.z);

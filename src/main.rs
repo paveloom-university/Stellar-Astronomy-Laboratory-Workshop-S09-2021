@@ -36,10 +36,20 @@ fn main() {
     let h = matches.value_of("h").unwrap().parse::<F>().unwrap();
     // Get path to the results directory
     let output = PathBuf::from(matches.value_of("output").unwrap());
+    // Get the results fields to write
+    let fields: Vec<&str> = matches.values_of("fields").unwrap().collect();
     // Get values of the input files
-    let files = matches.values_of("file(s)").unwrap();
+    let files: Vec<&str> = matches.values_of("file(s)").unwrap().collect();
     // Get switch value of the reverse mode
-    let rev = matches.occurrences_of("rev") == 1;
+    let rev = matches.occurrences_of("rev") != 0;
+    // Get switch value of the simulation mode
+    let sim = matches.occurrences_of("sim") != 0;
+    // Get the number of Monte Carlo simulations
+    let s = if sim {
+        matches.value_of("s").unwrap().parse::<I>().unwrap()
+    } else {
+        0
+    };
 
     println!("\n{:1$}> Parsing the files...", "", PADDING);
 
@@ -48,16 +58,27 @@ fn main() {
     // Print the parsing log
     println!("{}", log.format(PADDING + 2));
 
+    /// Print general information before the integration process begins
+    macro_rules! info {
+        () => {
+            println!("{:1$}h = {2}", "", PADDING + 2, h);
+            println!("{:1$}n = {2}", "", PADDING + 2, n);
+            if rev {
+                println!("{:1$}\nReverse mode enabled.", "", PADDING + 2);
+            } else if sim {
+                println!("{:1$}s = {2}\n", "", PADDING + 2, s);
+                println!("{:1$}Simulation mode enabled.", "", PADDING + 2);
+            }
+            println!();
+        };
+    }
+
     // Check how many orbits (initial coordinates and velocities) were parsed
     if orbits.is_empty() {
         println!("{:1$}> No orbits were parsed. Exiting.", "", PADDING);
     } else if orbits.len() == 1 {
         println!("{:1$}> One orbit was parsed.\n", "", PADDING);
-        println!("{:1$}h = {2}", "", PADDING + 2, h);
-        println!("{:1$}n = {2}\n", "", PADDING + 2, n);
-        if rev {
-            println!("{:1$}Reverse mode enabled.\n", "", PADDING + 2);
-        }
+        info!();
     } else {
         println!(
             "{:1$}> {2} orbits were parsed.\n",
@@ -65,23 +86,29 @@ fn main() {
             PADDING,
             orbits.len()
         );
-        println!("{:1$}h = {2}", "", PADDING + 2, h);
-        println!("{:1$}n = {2}\n", "", PADDING + 2, n);
-        if rev {
-            println!("{:1$}Reverse mode enabled.\n", "", PADDING + 2);
-        }
+        info!();
     }
 
     // Integrate each orbit and write the results
     for ref mut orbit in orbits {
-        println!(
-            "{:1$}> Integrating the orbit of {2}...",
-            "",
-            PADDING,
-            orbit.id()
-        );
-        orbit.integrate(n, h, rev);
-        orbit.write(&output);
+        if sim {
+            println!(
+                "{:1$}> Integrating the simulated orbits of {2}...",
+                "",
+                PADDING,
+                orbit.id()
+            );
+            orbit.simulate(&output, &fields, s, n, h);
+        } else {
+            println!(
+                "{:1$}> Integrating the orbit of {2}...",
+                "",
+                PADDING,
+                orbit.id()
+            );
+            orbit.integrate(n, h, rev);
+            orbit.write(&output, &fields, false);
+        }
     }
 
     println!();

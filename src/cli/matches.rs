@@ -5,15 +5,7 @@ use clap::{
 };
 use std::{ffi::OsString, path::Path};
 
-use crate::{F, I};
-
-/// Define the `rev` argument
-fn rev() -> Arg<'static, 'static> {
-    Arg::with_name("rev")
-        .help("Enable reverse mode")
-        .short("r")
-        .long("reverse")
-}
+use crate::{orbit::RESULTS_FIELDS, F, I};
 
 /// Define the `n` argument
 fn n() -> Arg<'static, 'static> {
@@ -29,11 +21,16 @@ fn n() -> Arg<'static, 'static> {
                 Err(OsString::from("Argument isn't a valid UTF-8 string.")),
                 |sl| {
                     if sl.chars().all(|c| c.is_numeric() || c == '-') {
-                        if sl.parse::<I>().is_ok() {
-                            Ok(())
-                        } else {
-                            Err(OsString::from("Argument isn't a positive integer."))
-                        }
+                        sl.parse::<I>().map_or(
+                            Err(OsString::from("Argument isn't a positive integer.")),
+                            |i| {
+                                if i == 0 {
+                                    Err(OsString::from("Argument isn't a positive integer."))
+                                } else {
+                                    Ok(())
+                                }
+                            },
+                        )
                     } else {
                         Err(OsString::from("Argument isn't numeric."))
                     }
@@ -72,6 +69,38 @@ fn h() -> Arg<'static, 'static> {
         })
 }
 
+/// Define the `s` argument
+fn s() -> Arg<'static, 'static> {
+    Arg::with_name("s")
+        .help("[SM] Set the number of Monte Carlo simulations")
+        .short("s")
+        .long("simulations")
+        .takes_value(true)
+        .empty_values(false)
+        .requires("sim")
+        .validator_os(|s| {
+            s.to_str().map_or(
+                Err(OsString::from("Argument isn't a valid UTF-8 string.")),
+                |sl| {
+                    if sl.chars().all(|c| c.is_numeric() || c == '-') {
+                        sl.parse::<I>().map_or(
+                            Err(OsString::from("Argument isn't a positive integer.")),
+                            |i| {
+                                if i == 0 {
+                                    Err(OsString::from("Argument isn't a positive integer."))
+                                } else {
+                                    Ok(())
+                                }
+                            },
+                        )
+                    } else {
+                        Err(OsString::from("Argument isn't numeric."))
+                    }
+                },
+            )
+        })
+}
+
 /// Define the `output` argument
 fn output() -> Arg<'static, 'static> {
     Arg::with_name("output")
@@ -90,6 +119,20 @@ fn output() -> Arg<'static, 'static> {
         })
 }
 
+// Define the `fields` argument
+fn fields() -> Arg<'static, 'static> {
+    Arg::with_name("fields")
+        .help("Set the fields to write")
+        .short("f")
+        .long("fields")
+        .takes_value(true)
+        .empty_values(false)
+        .required(true)
+        .require_delimiter(true)
+        .possible_values(RESULTS_FIELDS)
+        .hide_possible_values(true)
+}
+
 /// Define the `file(s)` argument
 fn files() -> Arg<'static, 'static> {
     Arg::with_name("file(s)")
@@ -105,13 +148,29 @@ fn files() -> Arg<'static, 'static> {
         })
 }
 
+/// Define the `rev` argument
+fn rev() -> Arg<'static, 'static> {
+    Arg::with_name("rev")
+        .help("Enable reverse mode [RM]")
+        .long("reverse")
+        .conflicts_with("sim")
+}
+
+/// Define the `sim` argument
+fn sim() -> Arg<'static, 'static> {
+    Arg::with_name("sim")
+        .help("Enable simulation mode [SM]")
+        .long("simulate")
+        .requires("s")
+}
+
 /// Define the CLI of the program, return the matched arguments
 pub fn get() -> ArgMatches<'static> {
     clap::app_from_crate!()
         .help_message("Print help information")
         .version_message("Print version information")
         .after_help("Documentation: ???\nReference: ???")
-        .args(&[n(), h(), output(), files(), rev()])
+        .args(&[n(), h(), s(), output(), fields(), files(), rev(), sim()])
         .settings(&[
             AppSettings::AllowNegativeNumbers,
             AppSettings::ArgRequiredElseHelp,

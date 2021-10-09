@@ -12,10 +12,10 @@ gr()
 # Change some of the default parameters for plots
 default(fontfamily="Computer Modern", dpi=300, legend=:topright)
 
-# Define the number of iterations used in the input data
-n = 500000
+# Define the number of integration iterations used
+n = 100000
 
-# Define the step used in the input data
+# Define the time step used
 h = -0.01
 
 # Define if reverse mode was used
@@ -39,7 +39,7 @@ for path in readdir("$(@__DIR__)/../data/output"; join=true)
         y_path = joinpath(path, "y.bin")
         e_path = joinpath(path, "e.bin")
         # Check if the data files exist
-        if isfile(r_path) && isfile(z_path) && isfile(e_path)
+        if isfile(r_path) && isfile(z_path) && isfile(x_path) && isfile(y_path) && isfile(e_path)
             # Get the ID of the object
             name = basename(path)
 
