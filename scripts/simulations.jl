@@ -22,11 +22,102 @@ h = -0.01
 # Define the number of simulation iterations
 s = 200
 
+# Define the number of minor ticks for heatmaps
+minorticks = 8
+
 # Define postfix for names of files
 postfix = if length(ARGS) > 0
     " ($(ARGS[1]))"
 else
     ""
+end
+
+# Plot a heatmap from the coordinates data
+function plot_heatmap(name, output_dir, x, y, xlabel, ylabel, plane)
+    # Plot the orbit
+    p = plot(
+        x[1:100:(n + 1)],
+        y[1:100:(n + 1)];
+        label="",
+        title=name,
+        xlabel,
+        ylabel,
+        size=(400, 400),
+        minorticks,
+        minorgrid=true,
+    );
+
+    # Define the ticks step
+    h₁ = abs(xticks(p)[1][1][2] - xticks(p)[1][1][1]) / minorticks
+    h₂ = abs(yticks(p)[1][1][2] - yticks(p)[1][1][1]) / minorticks
+
+    # Define the ranges of the heatmap matrix
+    r₁ = range(
+        (xticks(p)[1][1][1] - h₁ * floor((xticks(p)[1][1][1] - xlims(p)[1]) / h₁)) - 5 * h₁,
+        (xticks(p)[1][1][end] + h₁ * floor((xlims(p)[2] - xticks(p)[1][1][end]) / h₁)) + 5 * h₁;
+        step=h₁
+    )
+    r₂ = range(
+        (yticks(p)[1][1][1] - h₂ * floor((yticks(p)[1][1][1] - ylims(p)[1]) / h₂)) - 5 * h₂,
+        (yticks(p)[1][1][end] + h₂ * floor((ylims(p)[2] - yticks(p)[1][1][end]) / h₂)) + 5 * h₂;
+        step=h₂
+    )
+
+    # Get lengths of the ranges
+    l₁ = length(r₁)
+    l₂ = length(r₂)
+
+    # Define the heatmap matrix
+    m = Matrix{Int}(undef, l₂ - 1, l₁ - 1)
+    mₚ = Matrix{Int}(undef, l₂ - 1, l₁ - 1)
+    m .= 0
+
+    # For each simulation iteration
+    for i in 1:(s + 1)
+        # Get a copy of matrix on the previous step
+        mₚ .= m
+        # For each pair of the coordinates
+        for j in ((i - 1) * n + i):(i * n + i)
+            # Check if the orbit is in the limits of the grid
+            if (r₁[begin] ≤ x[j] ≤ r₁[end]) && (r₂[begin] ≤ y[j] ≤ r₂[end])
+                # Get the indices of the square
+                k = 1 + floor(Int, abs(x[j] - r₁[begin]) / h₁)
+                l = 1 + floor(Int, abs(y[j] - r₂[begin]) / h₂)
+
+                # Mark the crossed squares, once
+                if m[l, k] == mₚ[l, k]
+                    m[l, k] += 1
+                end
+            end
+        end
+    end
+
+    # Plot the heatmap
+    heatmap!(
+        p,
+        r₁,
+        r₂,
+        m / (s + 1);
+        color=cgrad([RGBA{Float64}(0., 0., 0., 0.); cgrad(:inferno)[2:end]]),
+        xticks=[xticks(p)[1][1][begin] - h₁ * minorticks; xticks(p)[1][1]; xticks(p)[1][1][end] + h₁ * 8],
+        yticks=[yticks(p)[1][1][begin] - h₂ * minorticks; yticks(p)[1][1]; yticks(p)[1][1][end] + h₂ * 8],
+    )
+
+    # Redraw the orbit
+    plot!(
+        p,
+        x[1:100:(n + 1)],
+        y[1:100:(n + 1)];
+        label="",
+        color=palette(:default)[1]
+    )
+
+    # Point out the starting position
+    scatter!(p, [x[1],], [y[1],]; label="");
+
+    # Save the figure as PDF and PNG
+    savefig(p, joinpath(output_dir, "$(name) (Simulated orbits, $(plane))$(postfix).pdf"))
+    savefig(p, joinpath(output_dir, "$(name) (Simulated orbits, $(plane))$(postfix).png"))
 end
 
 # For each path in the output directory
@@ -120,67 +211,9 @@ for path in readdir("$(@__DIR__)/../data/output"; join=true)
             savefig(p, joinpath(output_dir, "$(name) (Pericentric distances)$(postfix).pdf"))
             savefig(p, joinpath(output_dir, "$(name) (Pericentric distances)$(postfix).png"))
 
-            # For each simulation iteration
-            for i in 1:(s + 1)
-                # Define the output directory for this iteration
-                s_output_dir = i == 1 ? output_dir : joinpath("$(simulations_dir)/$(i - 1)")
-                    
-                # Create a directory for this iteration if it doesn't exist
-                if !isdir(s_output_dir)
-                    mkdir(s_output_dir)
-                end
-
-                # Plot the orbit in the RZ-plane
-                p = plot(
-                    r[((i - 1) * n + i):100:(i * n + i)],
-                    z[((i - 1) * n + i):100:(i * n + i)];
-                    label="",
-                    title=name,
-                    xlabel=L"R \; [\mathrm{kpc}]",
-                    ylabel=L"Z \; [\mathrm{kpc}]"
-                );
-
-                # Point out the starting position
-                scatter!(p, [r[((i - 1) * n + i)],], [z[((i - 1) * n + i)],]; label="");
-
-                # Save the figure as PDF and PNG
-                savefig(p, joinpath(s_output_dir, "$(name) (Orbit, RZ)$(postfix).pdf"))
-                savefig(p, joinpath(s_output_dir, "$(name) (Orbit, RZ)$(postfix).png"))
-
-                # Plot the orbit in the XY-plane
-                p = plot(
-                    x[((i - 1) * n + i):100:(i * n + i)],
-                    y[((i - 1) * n + i):100:(i * n + i)];
-                    label="",
-                    title=name,
-                    xlabel=L"X \; [\mathrm{kpc}]",
-                    ylabel=L"Y \;\, [\mathrm{kpc}]"
-                );
-
-                # Point out the starting position
-                scatter!(p, [x[((i - 1) * n + i)],], [y[((i - 1) * n + i)],]; label="");
-
-                # Save the figure as PDF and PNG
-                savefig(p, joinpath(s_output_dir, "$(name) (Orbit, XY)$(postfix).pdf"))
-                savefig(p, joinpath(s_output_dir, "$(name) (Orbit, XY)$(postfix).png"))
-
-                # Plot the total energy over time
-                p = plot(
-                    0.0:(h * 100 / 1000):(h * n / 1000),
-                    e[((i - 1) * n + i):100:(i * n + i)];
-                    label="",
-                    title=name,
-                    xlabel=L"T \;\, [\mathrm{Gyr}]",
-                    ylabel=L"E \; [\mathrm{km^2 \, s^{-2}}]"
-                );
-
-                # Point out the initial value
-                scatter!(p, [0.,], [e[((i - 1) * n + i)],]; label="");
-
-                # Save the figure as PDF and PNG
-                savefig(p, joinpath(s_output_dir, "$(name) (Total energy)$(postfix).pdf"))
-                savefig(p, joinpath(s_output_dir, "$(name) (Total energy)$(postfix).png"))
-            end
+            # Plot the heatmaps of simulated orbits in the RZ- and XY-planes
+            plot_heatmap(name, output_dir, r, z, L"R \; [\mathrm{kpc}]", L"Z \; [\mathrm{kpc}]", "RZ")
+            plot_heatmap(name, output_dir, x, y, L"X \; [\mathrm{kpc}]", L"Y \;\, [\mathrm{kpc}]", "XY")
         end
     end
 end
