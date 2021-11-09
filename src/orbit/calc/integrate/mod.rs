@@ -201,90 +201,54 @@ fn rk4(o: &mut Orbit, h: F, s_idx: I, f_idx: I) {
     let mut k_p_z_3: F;
     let mut k_p_z_4: F;
 
+    // Prepare aliases
+    let (r, psi, z, p_r, p_psi, p_z, x, y, e, _, _) = o.results.unpack();
+
     // Indices range depends on the forward or reverse mode
     for i in s_idx..=f_idx {
         // Calculate the increments for all integrable variables
         // (except for `p_psi`, since its derivative is 0)
 
-        k_r_1 = h * f_r(o.results.p_r[i - 1]);
-        k_psi_1 = h * f_psi(o.results.r[i - 1], o.results.p_psi[i - 1]);
-        k_z_1 = h * f_z(o.results.p_z[i - 1]);
-        k_p_r_1 = h * f_p_r(
-            o.results.r[i - 1],
-            o.results.z[i - 1],
-            o.results.p_psi[i - 1],
-        );
-        k_p_z_1 = h * f_p_z(o.results.r[i - 1], o.results.z[i - 1]);
+        k_r_1 = h * f_r(p_r[i - 1]);
+        k_psi_1 = h * f_psi(r[i - 1], p_psi[i - 1]);
+        k_z_1 = h * f_z(p_z[i - 1]);
+        k_p_r_1 = h * f_p_r(r[i - 1], z[i - 1], p_psi[i - 1]);
+        k_p_z_1 = h * f_p_z(r[i - 1], z[i - 1]);
 
-        k_r_2 = h * f_r(o.results.p_r[i - 1] + 0.5 * k_p_r_1);
-        k_psi_2 = h * f_psi(o.results.r[i - 1] + 0.5 * k_r_1, o.results.p_psi[i - 1]);
-        k_z_2 = h * f_z(o.results.p_z[i - 1] + 0.5 * k_p_z_1);
-        k_p_r_2 = h * f_p_r(
-            o.results.r[i - 1] + 0.5 * k_r_1,
-            o.results.z[i - 1] + 0.5 * k_z_1,
-            o.results.p_psi[i - 1],
-        );
-        k_p_z_2 = h * f_p_z(
-            o.results.r[i - 1] + 0.5 * k_r_1,
-            o.results.z[i - 1] + 0.5 * k_z_1,
-        );
+        k_r_2 = h * f_r(p_r[i - 1] + 0.5 * k_p_r_1);
+        k_psi_2 = h * f_psi(r[i - 1] + 0.5 * k_r_1, p_psi[i - 1]);
+        k_z_2 = h * f_z(p_z[i - 1] + 0.5 * k_p_z_1);
+        k_p_r_2 = h * f_p_r(r[i - 1] + 0.5 * k_r_1, z[i - 1] + 0.5 * k_z_1, p_psi[i - 1]);
+        k_p_z_2 = h * f_p_z(r[i - 1] + 0.5 * k_r_1, z[i - 1] + 0.5 * k_z_1);
 
-        k_r_3 = h * f_r(o.results.p_r[i - 1] + 0.5 * k_p_r_2);
-        k_psi_3 = h * f_psi(o.results.r[i - 1] + 0.5 * k_r_2, o.results.p_psi[i - 1]);
-        k_z_3 = h * f_z(o.results.p_z[i - 1] + 0.5 * k_p_z_2);
-        k_p_r_3 = h * f_p_r(
-            o.results.r[i - 1] + 0.5 * k_r_2,
-            o.results.z[i - 1] + 0.5 * k_z_2,
-            o.results.p_psi[i - 1],
-        );
-        k_p_z_3 = h * f_p_z(
-            o.results.r[i - 1] + 0.5 * k_r_2,
-            o.results.z[i - 1] + 0.5 * k_z_2,
-        );
+        k_r_3 = h * f_r(p_r[i - 1] + 0.5 * k_p_r_2);
+        k_psi_3 = h * f_psi(r[i - 1] + 0.5 * k_r_2, p_psi[i - 1]);
+        k_z_3 = h * f_z(p_z[i - 1] + 0.5 * k_p_z_2);
+        k_p_r_3 = h * f_p_r(r[i - 1] + 0.5 * k_r_2, z[i - 1] + 0.5 * k_z_2, p_psi[i - 1]);
+        k_p_z_3 = h * f_p_z(r[i - 1] + 0.5 * k_r_2, z[i - 1] + 0.5 * k_z_2);
 
-        k_r_4 = h * f_r(o.results.p_r[i - 1] + k_p_r_3);
-        k_psi_4 = h * f_psi(o.results.r[i - 1] + k_r_3, o.results.p_psi[i - 1]);
-        k_z_4 = h * f_z(o.results.p_z[i - 1] + k_p_z_3);
-        k_p_r_4 = h * f_p_r(
-            o.results.r[i - 1] + k_r_3,
-            o.results.z[i - 1] + k_z_3,
-            o.results.p_psi[i - 1],
-        );
-        k_p_z_4 = h * f_p_z(o.results.r[i - 1] + k_r_3, o.results.z[i - 1] + k_z_3);
+        k_r_4 = h * f_r(p_r[i - 1] + k_p_r_3);
+        k_psi_4 = h * f_psi(r[i - 1] + k_r_3, p_psi[i - 1]);
+        k_z_4 = h * f_z(p_z[i - 1] + k_p_z_3);
+        k_p_r_4 = h * f_p_r(r[i - 1] + k_r_3, z[i - 1] + k_z_3, p_psi[i - 1]);
+        k_p_z_4 = h * f_p_z(r[i - 1] + k_r_3, z[i - 1] + k_z_3);
 
         // Push the next values
 
         // Galactic Cylindrical system
-        o.results
-            .r
-            .push(o.results.r[i - 1] + 1.0 / 6.0 * (k_r_1 + 2.0 * k_r_2 + 2.0 * k_r_3 + k_r_4));
-        o.results.psi.push(
-            o.results.psi[i - 1] + 1.0 / 6.0 * (k_psi_1 + 2.0 * k_psi_2 + 2.0 * k_psi_3 + k_psi_4),
-        );
-        o.results
-            .z
-            .push(o.results.z[i - 1] + 1.0 / 6.0 * (k_z_1 + 2.0 * k_z_2 + 2.0 * k_z_3 + k_z_4));
-        o.results.p_r.push(
-            o.results.p_r[i - 1] + 1.0 / 6.0 * (k_p_r_1 + 2.0 * k_p_r_2 + 2.0 * k_p_r_3 + k_p_r_4),
-        );
-        o.results.p_psi.push(o.results.p_psi[i - 1]);
-        o.results.p_z.push(
-            o.results.p_z[i - 1] + 1.0 / 6.0 * (k_p_z_1 + 2.0 * k_p_z_2 + 2.0 * k_p_z_3 + k_p_z_4),
-        );
+        r.push(r[i - 1] + 1.0 / 6.0 * (k_r_1 + 2.0 * k_r_2 + 2.0 * k_r_3 + k_r_4));
+        psi.push(psi[i - 1] + 1.0 / 6.0 * (k_psi_1 + 2.0 * k_psi_2 + 2.0 * k_psi_3 + k_psi_4));
+        z.push(z[i - 1] + 1.0 / 6.0 * (k_z_1 + 2.0 * k_z_2 + 2.0 * k_z_3 + k_z_4));
+        p_r.push(p_r[i - 1] + 1.0 / 6.0 * (k_p_r_1 + 2.0 * k_p_r_2 + 2.0 * k_p_r_3 + k_p_r_4));
+        p_psi.push(p_psi[i - 1]);
+        p_z.push(p_z[i - 1] + 1.0 / 6.0 * (k_p_z_1 + 2.0 * k_p_z_2 + 2.0 * k_p_z_3 + k_p_z_4));
 
         // Galactic Cartesian system
-        o.results.x.push(o.results.r[i] * o.results.psi[i].cos());
-        o.results.y.push(o.results.r[i] * o.results.psi[i].sin());
+        x.push(r[i] * psi[i].cos());
+        y.push(r[i] * psi[i].sin());
 
         // Total energy
-        o.results.e.push(total_energy(
-            o.results.r[i],
-            o.results.psi[i],
-            o.results.z[i],
-            o.results.p_r[i],
-            o.results.p_psi[i],
-            o.results.p_z[i],
-        ));
+        e.push(total_energy(r[i], psi[i], z[i], p_r[i], p_psi[i], p_z[i]));
     }
 }
 
@@ -296,75 +260,72 @@ impl Orbit {
         // Save the number of integrations
         self.n = if rev { n * 2 } else { n };
 
+        // Prepare aliases
+        let (x_hc, _, y_hc, _, z_hc, _, u_hc, _, v_hc, _, w_hc, _) = self.hc_initials.unpack();
+        let (x_gca, y_gca, z_gca, u_gca, v_gca, w_gca) = self.gca_initials.unpack();
+        let (r_gcy, psi_gcy, z_gcy, dr_gcy, dpsi_gcy, dz_gcy) = self.gcy_initials.unpack();
+        let (r_res, psi_res, z_res, p_r_res, p_psi_res, p_z_res, x_res, y_res, e_res, _, _) =
+            self.results.unpack();
+
         // Convert the initial coordinates and velocities
         // from the Heliocentric Cartesian system to the
         // Galactic Cartesian system
-        self.gca_initials.x = self.hc_initials.x.to_gca_x();
-        self.gca_initials.y = self.hc_initials.y;
-        self.gca_initials.z = self.hc_initials.z.to_gca_z();
-        self.gca_initials.u = self.hc_initials.u.to_gca_u();
-        self.gca_initials.v = self.hc_initials.v.to_gca_v();
-        self.gca_initials.w = self.hc_initials.w.to_gca_w();
+        *x_gca = x_hc.to_gca_x();
+        *y_gca = *y_hc;
+        *z_gca = z_hc.to_gca_z();
+        *u_gca = u_hc.to_gca_u();
+        *v_gca = v_hc.to_gca_v();
+        *w_gca = w_hc.to_gca_w();
 
         // Convert the initial coordinates and velocities
         // from the Galactic Cartesian system to the
         // Galactic Cylindrical system
-        self.gcy_initials.r = (self.gca_initials.x.powi(2) + self.gca_initials.y.powi(2)).sqrt();
-        self.gcy_initials.psi = self.gca_initials.y.atan2(self.gca_initials.x);
-        self.gcy_initials.z = self.gca_initials.z;
-        self.gcy_initials.dr = -self.gca_initials.u * self.gcy_initials.psi.cos()
-            + self.gca_initials.v * self.gcy_initials.psi.sin();
-        self.gcy_initials.dpsi = ((self.gca_initials.u * self.gcy_initials.psi.sin()
-            + self.gca_initials.v * self.gcy_initials.psi.cos())
-            / self.gcy_initials.r)
-            .to_kpc();
-        self.gcy_initials.dz = self.gca_initials.w;
+        *r_gcy = (x_gca.powi(2) + y_gca.powi(2)).sqrt();
+        *psi_gcy = y_gca.atan2(*x_gca);
+        *z_gcy = *z_gca;
+        *dr_gcy = -*u_gca * psi_gcy.cos() + *v_gca * psi_gcy.sin();
+        *dpsi_gcy = ((*u_gca * psi_gcy.sin() + *v_gca * psi_gcy.cos()) / *r_gcy).to_kpc();
+        *dz_gcy = *w_gca;
 
         // Prepare the results vectors
 
         // Solutions of the Lagrangian equations
-        self.results.r = Vec::<F>::with_capacity(self.n + 1);
-        self.results.psi = Vec::<F>::with_capacity(self.n + 1);
-        self.results.z = Vec::<F>::with_capacity(self.n + 1);
-        self.results.p_r = Vec::<F>::with_capacity(self.n + 1);
-        self.results.p_psi = Vec::<F>::with_capacity(self.n + 1);
-        self.results.p_z = Vec::<F>::with_capacity(self.n + 1);
+        *r_res = Vec::<F>::with_capacity(self.n + 1);
+        *psi_res = Vec::<F>::with_capacity(self.n + 1);
+        *z_res = Vec::<F>::with_capacity(self.n + 1);
+        *p_r_res = Vec::<F>::with_capacity(self.n + 1);
+        *p_psi_res = Vec::<F>::with_capacity(self.n + 1);
+        *p_z_res = Vec::<F>::with_capacity(self.n + 1);
 
         // Galactic Cartesian system
-        self.results.x = Vec::<F>::with_capacity(self.n + 1);
-        self.results.y = Vec::<F>::with_capacity(self.n + 1);
+        *x_res = Vec::<F>::with_capacity(self.n + 1);
+        *y_res = Vec::<F>::with_capacity(self.n + 1);
 
         // Total energy
-        self.results.e = Vec::<F>::with_capacity(self.n + 1);
+        *e_res = Vec::<F>::with_capacity(self.n + 1);
 
         // Push the initial values
 
         // Solutions of the Lagrangian equations
-        self.results.r.push(self.gcy_initials.r);
-        self.results.psi.push(self.gcy_initials.psi);
-        self.results.z.push(self.gcy_initials.z);
-        self.results.p_r.push(self.gcy_initials.dr.to_kpc_per_myr());
-        self.results
-            .p_psi
-            .push((self.gcy_initials.r.powi(2) * self.gcy_initials.dpsi).to_seconds());
-        self.results.p_z.push(self.gcy_initials.dz.to_kpc_per_myr());
+        r_res.push(*r_gcy);
+        psi_res.push(*psi_gcy);
+        z_res.push(*z_gcy);
+        p_r_res.push(dr_gcy.to_kpc_per_myr());
+        p_psi_res.push((r_gcy.powi(2) * *dpsi_gcy).to_seconds());
+        p_z_res.push(dz_gcy.to_kpc_per_myr());
 
         // Galactic Cartesian system
-        self.results
-            .x
-            .push(self.results.r[0] * self.results.psi[0].cos());
-        self.results
-            .y
-            .push(self.results.r[0] * self.results.psi[0].sin());
+        x_res.push(r_res[0] * psi_res[0].cos());
+        y_res.push(r_res[0] * psi_res[0].sin());
 
         // Total energy
-        self.results.e.push(total_energy(
-            self.results.r[0],
-            self.results.psi[0],
-            self.results.z[0],
-            self.results.p_r[0],
-            self.results.p_psi[0],
-            self.results.p_z[0],
+        e_res.push(total_energy(
+            r_res[0],
+            psi_res[0],
+            z_res[0],
+            p_r_res[0],
+            p_psi_res[0],
+            p_z_res[0],
         ));
 
         // Integrate the orbit using the fourth-order Runge-Kutta algorithm

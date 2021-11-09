@@ -13,15 +13,18 @@ fn dist(r: F, z: F) -> F {
 }
 
 /// Find and return the apocentric and pericentric distances
-fn dist_extrema(o: &Orbit) -> (F, F) {
+fn apo_peri(o: &Orbit) -> (F, F) {
+    // Prepare aliases
+    let (r_res, z_res) = (&o.results.r, &o.results.z);
+
     // Get the initial values
-    let mut apo = dist(o.results.r[0], o.results.z[0]);
+    let mut apo = dist(r_res[0], z_res[0]);
     let mut peri = apo;
 
     // For every other pair
     for j in 1..=o.n {
         // Calculate the distance
-        let d = dist(o.results.r[j], o.results.z[j]);
+        let d = dist(r_res[j], z_res[j]);
         // Depending on the distance, update either
         // the apocentric or the pericentric distance
         if d > apo {
@@ -80,7 +83,7 @@ impl Orbit {
         self.integrate(n, h, false);
 
         // Find the apocentric and pericentric distances
-        let (apo, peri) = dist_extrema(self);
+        let (apo, peri) = apo_peri(self);
 
         // Save the distances
         self.results.apo.push(apo);
@@ -103,7 +106,7 @@ impl Orbit {
             self.integrate(n, h, false);
 
             // Find the apocentric and pericentric distances
-            let (apo, peri) = dist_extrema(self);
+            let (apo, peri) = apo_peri(self);
 
             // Save the distances
             self.results.apo.push(apo);

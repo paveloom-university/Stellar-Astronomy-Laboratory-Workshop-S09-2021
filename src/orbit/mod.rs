@@ -10,6 +10,12 @@ use crate::{F, I};
 pub mod calc;
 mod io;
 
+/// An alias to `&mut F`
+type MutFRef<'a> = &'a mut F;
+
+/// An alias to `&mut Vec<F>`
+type MutVecFRef<'a> = &'a mut Vec<F>;
+
 /// Create a struct with a common fields type
 macro_rules! def_struct {
     (
@@ -134,6 +140,41 @@ pub struct HCInitials(F) {
 }
 }
 
+impl HCInitials {
+    /// Get mutable references to the fields
+    pub fn unpack(
+        &mut self,
+    ) -> (
+        MutFRef,
+        MutFRef,
+        MutFRef,
+        MutFRef,
+        MutFRef,
+        MutFRef,
+        MutFRef,
+        MutFRef,
+        MutFRef,
+        MutFRef,
+        MutFRef,
+        MutFRef,
+    ) {
+        (
+            &mut self.x,
+            &mut self.x_err,
+            &mut self.y,
+            &mut self.y_err,
+            &mut self.z,
+            &mut self.z_err,
+            &mut self.u,
+            &mut self.u_err,
+            &mut self.v,
+            &mut self.v_err,
+            &mut self.w,
+            &mut self.w_err,
+        )
+    }
+}
+
 init_struct! {
 /// Initial coordinates and velocities of a globular
 /// cluster in the Galactic Cartesian system
@@ -153,6 +194,20 @@ pub struct GCaInitials(F, 0.0) {
 }
 }
 
+impl GCaInitials {
+    /// Get mutable references to the fields
+    pub fn unpack(&mut self) -> (MutFRef, MutFRef, MutFRef, MutFRef, MutFRef, MutFRef) {
+        (
+            &mut self.x,
+            &mut self.y,
+            &mut self.z,
+            &mut self.u,
+            &mut self.v,
+            &mut self.w,
+        )
+    }
+}
+
 init_struct! {
 /// Initial coordinates and velocities of a globular
 /// cluster in the Galactic Cylindrical system
@@ -170,6 +225,20 @@ pub struct GCyInitials(F, 0.0) {
     /// Time derivative of Z $\[ \text{km} \\, \text{s}^{-1} \]$
     dz,
 }
+}
+
+impl GCyInitials {
+    /// Get mutable references to the fields
+    pub fn unpack(&mut self) -> (MutFRef, MutFRef, MutFRef, MutFRef, MutFRef, MutFRef) {
+        (
+            &mut self.r,
+            &mut self.psi,
+            &mut self.z,
+            &mut self.dr,
+            &mut self.dpsi,
+            &mut self.dz,
+        )
+    }
 }
 
 fields_struct! {
@@ -198,6 +267,39 @@ pub struct Results(Vec<F>, Vec::<F>::new()) {
     /// Pericentric distance $\[ \text{kpc} \]$
     peri,
 }
+}
+
+impl Results {
+    /// Get mutable references to the fields
+    pub fn unpack(
+        &mut self,
+    ) -> (
+        MutVecFRef,
+        MutVecFRef,
+        MutVecFRef,
+        MutVecFRef,
+        MutVecFRef,
+        MutVecFRef,
+        MutVecFRef,
+        MutVecFRef,
+        MutVecFRef,
+        MutVecFRef,
+        MutVecFRef,
+    ) {
+        (
+            &mut self.r,
+            &mut self.psi,
+            &mut self.z,
+            &mut self.p_r,
+            &mut self.p_psi,
+            &mut self.p_z,
+            &mut self.x,
+            &mut self.y,
+            &mut self.e,
+            &mut self.apo,
+            &mut self.peri,
+        )
+    }
 }
 
 /// An orbit of a globular cluster

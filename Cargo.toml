@@ -1,7 +1,7 @@
 [package]
 name = "kidou"
 version = "0.1.0"
-authors = ["Pavel Sobolev <paveloom@tuta.io>"]
+authors = ["Pavel Sobolev <paveloom@riseup.net>"]
 edition = "2021"
 rust-version = "1.56"
 description = "Calculate the orbits of globular clusters in a model of the Galaxy potential"
