@@ -1,0 +1,11 @@
+# Project:
+# - output data files
+/data/output
+# - plots
+/plots
+
+# Rust: Builds
+/target
+
+# Julia: Manifest files
+Manifest.toml
