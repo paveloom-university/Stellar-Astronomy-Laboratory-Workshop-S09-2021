@@ -14,6 +14,7 @@ use std::path::PathBuf;
 mod cli;
 pub mod orbit;
 
+use orbit::calc::models::M1;
 use orbit::Orbit;
 
 /// The floating point type used across the program
@@ -89,6 +90,9 @@ fn main() {
         info!();
     }
 
+    // Choose the model
+    let m = M1 {};
+
     // Integrate each orbit and write the results
     for ref mut orbit in orbits {
         if sim {
@@ -98,7 +102,7 @@ fn main() {
                 PADDING,
                 orbit.id()
             );
-            orbit.simulate(&output, &fields, s, n, h);
+            orbit.simulate(&m, &output, &fields, s, n, h);
         } else {
             println!(
                 "{:1$}> Integrating the orbit of {2}...",
@@ -106,7 +110,7 @@ fn main() {
                 PADDING,
                 orbit.id()
             );
-            orbit.integrate(n, h, rev);
+            orbit.integrate(&m, n, h, rev);
             orbit.write(&output, &fields, false);
         }
     }

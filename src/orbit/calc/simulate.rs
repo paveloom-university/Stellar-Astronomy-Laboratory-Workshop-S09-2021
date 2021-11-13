@@ -5,6 +5,7 @@ use rand_distr::{Distribution, Normal};
 use rand_xoshiro::Xoshiro256PlusPlus;
 use std::path::Path;
 
+use crate::orbit::calc::models::Model;
 use crate::{Orbit, F, I};
 
 /// Calculate the distance using R and Z coordinates
@@ -51,7 +52,7 @@ impl Orbit {
     /// # Panics
     /// Can panic if standard deviations aren't finite.
     /// This should be handled in the [`load`](Orbit#method.load) routine.
-    pub fn simulate(&mut self, folder: &Path, fields: &[&str], s: I, n: I, h: F) {
+    pub fn simulate(&mut self, m: &impl Model, folder: &Path, fields: &[&str], s: I, n: I, h: F) {
         // Initialize the random generator
         let mut rng = Xoshiro256PlusPlus::seed_from_u64(1);
 
@@ -80,7 +81,7 @@ impl Orbit {
             .collect::<Vec<&str>>();
 
         // Integrate with initial values first
-        self.integrate(n, h, false);
+        self.integrate(m, n, h, false);
 
         // Find the apocentric and pericentric distances
         let (apo, peri) = apo_peri(self);
@@ -103,7 +104,7 @@ impl Orbit {
             self.hc_initials.w = normal_w.sample(&mut rng);
 
             // Integrate the orbit
-            self.integrate(n, h, false);
+            self.integrate(m, n, h, false);
 
             // Find the apocentric and pericentric distances
             let (apo, peri) = apo_peri(self);

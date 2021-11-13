@@ -97,32 +97,12 @@
 //! \Phi(R, Z) \\, [\text{km}^2 \\, \text{s}^{-2} \rightarrow \text{100} \\,
 //! \text{km}^2 \\, \text{s}^{-2}] + V_\text{tot}^2 / 2 $.
 
-use super::potentials::{miyamoto_nagai, navarro_frenk_white, plummer};
+use crate::orbit::calc::models::Model;
 use crate::{orbit::Orbit, F, I};
 
 mod constants;
 
 use constants::{conversion::Conversions, correction::Corrections};
-
-/// Calculate the value of the Galactic potential $ \Phi(R, Z) $
-/// $\[ 100 \\, \text{km}^2 \\, \text{s}^{-2} \]$
-fn phi(r: F, z: F) -> F {
-    plummer::phi(r, z) + miyamoto_nagai::phi(r, z) + navarro_frenk_white::phi(r, z)
-}
-
-/// Calculate the value of $ \partial \Phi(R, Z) / \partial R $
-/// $\[ \text{kpc} \\, \text{Myr}^{-2} \]$
-fn phi_dr(r: F, z: F) -> F {
-    (plummer::phi_dr(r, z) + miyamoto_nagai::phi_dr(r, z) + navarro_frenk_white::phi_dr(r, z))
-        .to_kpc_per_myr_2()
-}
-
-/// Calculate the value of $ \partial \Phi(R, Z) / \partial Z $
-/// $\[ \text{kpc} \\, \text{Myr}^{-2} \]$
-fn phi_dz(r: F, z: F) -> F {
-    (plummer::phi_dz(r, z) + miyamoto_nagai::phi_dz(r, z) + navarro_frenk_white::phi_dz(r, z))
-        .to_kpc_per_myr_2()
-}
 
 /// Calculate the right-hand part of the equation for
 /// $ \dot{R} $ $\[ \text{kpc} \\, \text{Myr}^{-1} \]$
@@ -144,14 +124,14 @@ fn f_z(p_z: F) -> F {
 
 /// Calculate the right-hand part of the equation for
 /// $ \dot{p_r} $ $\[ \text{kpc} \\, \text{Myr}^{-2} \]$
-fn f_p_r(r: F, z: F, p_psi: F) -> F {
-    -phi_dr(r, z) + p_psi.powi(2) / r.powi(3)
+fn f_p_r(r: F, z: F, p_psi: F, m: &impl Model) -> F {
+    -m.phi_dr(r, z) + p_psi.powi(2) / r.powi(3)
 }
 
 /// Calculate the right-hand part of the equation for
 /// $ \dot{p_z} $ $\[ \text{kpc} \\, \text{Myr}^{-2} \]$
-fn f_p_z(r: F, z: F) -> F {
-    -phi_dz(r, z)
+fn f_p_z(r: F, z: F, m: &impl Model) -> F {
+    -m.phi_dz(r, z)
 }
 
 /// Calculate the value of radial velocity
@@ -169,16 +149,16 @@ fn tangential_velocity(r: F, psi: F, p_r: F, p_psi: F) -> F {
 }
 
 /// Calculate the value of total energy E $\[ \text{km}^2 \\, \text{s}^{-2} \]$
-fn total_energy(r: F, psi: F, z: F, p_r: F, p_psi: F, p_z: F) -> F {
+fn total_energy(r: F, psi: F, z: F, p_r: F, p_psi: F, p_z: F, m: &impl Model) -> F {
     (radial_velocity(r, psi, p_r, p_psi).powi(2)
         + tangential_velocity(r, psi, p_r, p_psi).powi(2)
         + p_z.to_km_per_s().powi(2))
         / 2.0
-        + phi(r, z) * 100.0
+        + m.phi(r, z) * 100.0
 }
 
 /// Integrate the orbit using the fourth-order Runge-Kutta algorithm
-fn rk4(o: &mut Orbit, h: F, s_idx: I, f_idx: I) {
+fn rk4(orbit: &mut Orbit, m: &impl Model, h: F, s_idx: I, f_idx: I) {
     // Prepare buffers for the increments
     let mut k_r_1: F;
     let mut k_r_2: F;
@@ -202,7 +182,7 @@ fn rk4(o: &mut Orbit, h: F, s_idx: I, f_idx: I) {
     let mut k_p_z_4: F;
 
     // Prepare aliases
-    let (r, psi, z, p_r, p_psi, p_z, x, y, e, _, _) = o.results.unpack();
+    let (r, psi, z, p_r, p_psi, p_z, x, y, e, _, _) = orbit.results.unpack();
 
     // Indices range depends on the forward or reverse mode
     for i in s_idx..=f_idx {
@@ -212,26 +192,36 @@ fn rk4(o: &mut Orbit, h: F, s_idx: I, f_idx: I) {
         k_r_1 = h * f_r(p_r[i - 1]);
         k_psi_1 = h * f_psi(r[i - 1], p_psi[i - 1]);
         k_z_1 = h * f_z(p_z[i - 1]);
-        k_p_r_1 = h * f_p_r(r[i - 1], z[i - 1], p_psi[i - 1]);
-        k_p_z_1 = h * f_p_z(r[i - 1], z[i - 1]);
+        k_p_r_1 = h * f_p_r(r[i - 1], z[i - 1], p_psi[i - 1], m);
+        k_p_z_1 = h * f_p_z(r[i - 1], z[i - 1], m);
 
         k_r_2 = h * f_r(p_r[i - 1] + 0.5 * k_p_r_1);
         k_psi_2 = h * f_psi(r[i - 1] + 0.5 * k_r_1, p_psi[i - 1]);
         k_z_2 = h * f_z(p_z[i - 1] + 0.5 * k_p_z_1);
-        k_p_r_2 = h * f_p_r(r[i - 1] + 0.5 * k_r_1, z[i - 1] + 0.5 * k_z_1, p_psi[i - 1]);
-        k_p_z_2 = h * f_p_z(r[i - 1] + 0.5 * k_r_1, z[i - 1] + 0.5 * k_z_1);
+        k_p_r_2 = h * f_p_r(
+            r[i - 1] + 0.5 * k_r_1,
+            z[i - 1] + 0.5 * k_z_1,
+            p_psi[i - 1],
+            m,
+        );
+        k_p_z_2 = h * f_p_z(r[i - 1] + 0.5 * k_r_1, z[i - 1] + 0.5 * k_z_1, m);
 
         k_r_3 = h * f_r(p_r[i - 1] + 0.5 * k_p_r_2);
         k_psi_3 = h * f_psi(r[i - 1] + 0.5 * k_r_2, p_psi[i - 1]);
         k_z_3 = h * f_z(p_z[i - 1] + 0.5 * k_p_z_2);
-        k_p_r_3 = h * f_p_r(r[i - 1] + 0.5 * k_r_2, z[i - 1] + 0.5 * k_z_2, p_psi[i - 1]);
-        k_p_z_3 = h * f_p_z(r[i - 1] + 0.5 * k_r_2, z[i - 1] + 0.5 * k_z_2);
+        k_p_r_3 = h * f_p_r(
+            r[i - 1] + 0.5 * k_r_2,
+            z[i - 1] + 0.5 * k_z_2,
+            p_psi[i - 1],
+            m,
+        );
+        k_p_z_3 = h * f_p_z(r[i - 1] + 0.5 * k_r_2, z[i - 1] + 0.5 * k_z_2, m);
 
         k_r_4 = h * f_r(p_r[i - 1] + k_p_r_3);
         k_psi_4 = h * f_psi(r[i - 1] + k_r_3, p_psi[i - 1]);
         k_z_4 = h * f_z(p_z[i - 1] + k_p_z_3);
-        k_p_r_4 = h * f_p_r(r[i - 1] + k_r_3, z[i - 1] + k_z_3, p_psi[i - 1]);
-        k_p_z_4 = h * f_p_z(r[i - 1] + k_r_3, z[i - 1] + k_z_3);
+        k_p_r_4 = h * f_p_r(r[i - 1] + k_r_3, z[i - 1] + k_z_3, p_psi[i - 1], m);
+        k_p_z_4 = h * f_p_z(r[i - 1] + k_r_3, z[i - 1] + k_z_3, m);
 
         // Push the next values
 
@@ -248,7 +238,9 @@ fn rk4(o: &mut Orbit, h: F, s_idx: I, f_idx: I) {
         y.push(r[i] * psi[i].sin());
 
         // Total energy
-        e.push(total_energy(r[i], psi[i], z[i], p_r[i], p_psi[i], p_z[i]));
+        e.push(total_energy(
+            r[i], psi[i], z[i], p_r[i], p_psi[i], p_z[i], m,
+        ));
     }
 }
 
@@ -256,7 +248,7 @@ impl Orbit {
     /// Integrate the orbit with the specified
     /// number of iterations `n` and the time step `h`
     /// using the fourth-order Runge-Kutta algorithm
-    pub fn integrate(&mut self, n: I, h: F, rev: bool) {
+    pub fn integrate(&mut self, m: &impl Model, n: I, h: F, rev: bool) {
         // Save the number of integrations
         self.n = if rev { n * 2 } else { n };
 
@@ -326,13 +318,14 @@ impl Orbit {
             p_r_res[0],
             p_psi_res[0],
             p_z_res[0],
+            m,
         ));
 
         // Integrate the orbit using the fourth-order Runge-Kutta algorithm
-        rk4(self, h, 1, n);
+        rk4(self, m, h, 1, n);
         // Integrate in reverse if specified by the user
         if rev {
-            rk4(self, -h, n + 1, self.n + 1);
+            rk4(self, m, -h, n + 1, self.n + 1);
         }
     }
 }
