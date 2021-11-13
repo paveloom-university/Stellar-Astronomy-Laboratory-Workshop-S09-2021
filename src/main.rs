@@ -5,9 +5,10 @@
 //!
 //! Module documentations:
 //! - [Description of the units conversions before and
-//! after the integration](crate::orbit::calc::integrate)
+//!   after the integration](crate::orbit::calc::integrate)
 //! - [A list of available potentials and their
-//! derivatives](crate::orbit::calc::potentials)
+//!   derivatives](crate::orbit::calc::potentials)
+//! - [A list of available models](crate::orbit::calc::models)
 
 use std::path::PathBuf;
 
@@ -32,7 +33,7 @@ fn main() {
     let matches = cli::get_matches();
 
     // Get the model
-    let model = MODELS[matches.value_of("model").unwrap().parse::<I>().unwrap()];
+    let model = MODELS[matches.value_of("model").unwrap().parse::<I>().unwrap() - 1];
     // Get the number of iterations
     let n = matches.value_of("n").unwrap().parse::<I>().unwrap();
     // Get the time step

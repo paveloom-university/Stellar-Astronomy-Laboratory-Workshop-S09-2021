@@ -22,9 +22,11 @@ fn model() -> Arg<'static, 'static> {
                 |sl| {
                     if sl.chars().all(|c| c.is_numeric() || c == '-') {
                         sl.parse::<I>().map_or(
-                            Err(OsString::from("Argument isn't a non-negative integer.")),
+                            Err(OsString::from("Argument isn't a positive integer.")),
                             |i| {
-                                if i > MODELS.len() - 1 {
+                                if i == 0 {
+                                    Err(OsString::from("Argument isn't a positive integer."))
+                                } else if i > MODELS.len() {
                                     Err(OsString::from("There is no model with this index."))
                                 } else {
                                     Ok(())
