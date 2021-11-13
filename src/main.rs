@@ -14,7 +14,7 @@ use std::path::PathBuf;
 mod cli;
 pub mod orbit;
 
-use orbit::calc::models::M1;
+use orbit::calc::models::MODELS;
 use orbit::Orbit;
 
 /// The floating point type used across the program
@@ -31,6 +31,8 @@ fn main() {
     // Define the CLI of the program, get the matched arguments
     let matches = cli::get_matches();
 
+    // Get the model
+    let model = MODELS[matches.value_of("model").unwrap().parse::<I>().unwrap()];
     // Get the number of iterations
     let n = matches.value_of("n").unwrap().parse::<I>().unwrap();
     // Get the time step
@@ -90,9 +92,6 @@ fn main() {
         info!();
     }
 
-    // Choose the model
-    let m = M1 {};
-
     // Integrate each orbit and write the results
     for ref mut orbit in orbits {
         if sim {
@@ -102,7 +101,7 @@ fn main() {
                 PADDING,
                 orbit.id()
             );
-            orbit.simulate(&m, &output, &fields, s, n, h);
+            orbit.simulate(model, &output, &fields, s, n, h);
         } else {
             println!(
                 "{:1$}> Integrating the orbit of {2}...",
@@ -110,7 +109,7 @@ fn main() {
                 PADDING,
                 orbit.id()
             );
-            orbit.integrate(&m, n, h, rev);
+            orbit.integrate(model, n, h, rev);
             orbit.write(&output, &fields, false);
         }
     }

@@ -5,7 +5,39 @@ use clap::{
 };
 use std::{ffi::OsString, path::Path};
 
+use crate::orbit::calc::models::MODELS;
 use crate::{orbit::Results, F, I};
+
+/// Define the `model` argument
+fn model() -> Arg<'static, 'static> {
+    Arg::with_name("model")
+        .help("Set the model by index")
+        .long("model")
+        .takes_value(true)
+        .empty_values(false)
+        .required(true)
+        .validator_os(|s| {
+            s.to_str().map_or(
+                Err(OsString::from("Argument isn't a valid UTF-8 string.")),
+                |sl| {
+                    if sl.chars().all(|c| c.is_numeric() || c == '-') {
+                        sl.parse::<I>().map_or(
+                            Err(OsString::from("Argument isn't a non-negative integer.")),
+                            |i| {
+                                if i > MODELS.len() - 1 {
+                                    Err(OsString::from("There is no model with this index."))
+                                } else {
+                                    Ok(())
+                                }
+                            },
+                        )
+                    } else {
+                        Err(OsString::from("Argument isn't numeric."))
+                    }
+                },
+            )
+        })
+}
 
 /// Define the `n` argument
 fn n() -> Arg<'static, 'static> {
@@ -170,7 +202,17 @@ pub fn get() -> ArgMatches<'static> {
         .help_message("Print help information")
         .version_message("Print version information")
         .after_help("Documentation: ???\nReference: ???")
-        .args(&[n(), h(), s(), output(), fields(), files(), rev(), sim()])
+        .args(&[
+            model(),
+            n(),
+            h(),
+            s(),
+            output(),
+            fields(),
+            files(),
+            rev(),
+            sim(),
+        ])
         .settings(&[
             AppSettings::AllowNegativeNumbers,
             AppSettings::ArgRequiredElseHelp,
