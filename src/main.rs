@@ -5,15 +5,17 @@
 //!
 //! Module documentations:
 //! - [Description of the units conversions before and
-//! after the integration](crate::orbit::calc::integrate)
+//!   after the integration](crate::orbit::calc::integrate)
 //! - [A list of available potentials and their
-//! derivatives](crate::orbit::calc::potentials)
+//!   derivatives](crate::orbit::calc::potentials)
+//! - [A list of available models](crate::orbit::calc::models)
 
 use std::path::PathBuf;
 
 mod cli;
 pub mod orbit;
 
+use orbit::calc::models::MODELS;
 use orbit::Orbit;
 
 /// The floating point type used across the program
@@ -30,6 +32,8 @@ fn main() {
     // Define the CLI of the program, get the matched arguments
     let matches = cli::get_matches();
 
+    // Get the model
+    let model = MODELS[matches.value_of("model").unwrap().parse::<I>().unwrap() - 1];
     // Get the number of iterations
     let n = matches.value_of("n").unwrap().parse::<I>().unwrap();
     // Get the time step
@@ -98,7 +102,7 @@ fn main() {
                 PADDING,
                 orbit.id()
             );
-            orbit.simulate(&output, &fields, s, n, h);
+            orbit.simulate(model, &output, &fields, s, n, h);
         } else {
             println!(
                 "{:1$}> Integrating the orbit of {2}...",
@@ -106,7 +110,7 @@ fn main() {
                 PADDING,
                 orbit.id()
             );
-            orbit.integrate(n, h, rev);
+            orbit.integrate(model, n, h, rev);
             orbit.write(&output, &fields, false);
         }
     }
