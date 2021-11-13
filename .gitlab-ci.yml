@@ -1,0 +1,17 @@
+image: ubuntu:21.10
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH
+
+pages:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  script:
+    - |
+      apt-get update && apt-get -y install curl build-essential
+      curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh -s -- -y
+      PATH=$HOME/.cargo/bin:$PATH ./document.bash
+  artifacts:
+    paths:
+      - target/doc
