@@ -10,7 +10,7 @@ using Plots
 gr()
 
 # Change some of the default parameters for plots
-default(fontfamily="Computer Modern", dpi=300, legend=:topright)
+default(fontfamily = "Computer Modern", dpi = 300, legend = :topright)
 
 # Define the number of integration iterations used
 n = 100000
@@ -28,8 +28,14 @@ else
     ""
 end
 
+# Define the paths to output directories
+CURRENT_DIR = @__DIR__
+ROOT_DIR = basename(CURRENT_DIR) == "scripts" ? dirname(CURRENT_DIR) : CURRENT_DIR
+DATA_OUTPUT = joinpath(ROOT_DIR, "data", "output")
+PLOTS_OUTPUT = joinpath(ROOT_DIR, "plots")
+
 # For each path in the output directory
-for path in readdir("$(@__DIR__)/../data/output"; join=true)
+for path in readdir(DATA_OUTPUT; join = true)
     # Check if the path is a directory
     if isdir(path)
         # Define the paths to the binary files
@@ -44,7 +50,7 @@ for path in readdir("$(@__DIR__)/../data/output"; join=true)
             name = basename(path)
 
             # Define the output directory for plots
-            output_dir = joinpath("$(@__DIR__)/../plots/$(name)")
+            output_dir = joinpath(PLOTS_OUTPUT, name)
 
             # Create a directory for the object in the plots folder
             if !isdir(output_dir)
@@ -71,14 +77,14 @@ for path in readdir("$(@__DIR__)/../data/output"; join=true)
             p = plot(
                 r[1:100:end],
                 z[1:100:end];
-                label="",
-                title=name,
-                xlabel=L"R \; [\mathrm{kpc}]",
-                ylabel=L"Z \; [\mathrm{kpc}]"
-            );
+                label = "",
+                title = name,
+                xlabel = L"R \; [\mathrm{kpc}]",
+                ylabel = L"Z \; [\mathrm{kpc}]"
+            )
 
             # Point out the starting position
-            scatter!(p, [r[1],], [z[1],]; label="");
+            scatter!(p, [r[1],], [z[1],]; label = "")
 
             # Save the figure as PDF and PNG
             savefig(p, joinpath(output_dir, "$(name) (Orbit, RZ)$(postfix).pdf"))
@@ -88,14 +94,14 @@ for path in readdir("$(@__DIR__)/../data/output"; join=true)
             p = plot(
                 x[1:100:end],
                 y[1:100:end];
-                label="",
-                title=name,
-                xlabel=L"X \; [\mathrm{kpc}]",
-                ylabel=L"Y \;\, [\mathrm{kpc}]"
-            );
+                label = "",
+                title = name,
+                xlabel = L"X \; [\mathrm{kpc}]",
+                ylabel = L"Y \;\, [\mathrm{kpc}]"
+            )
 
             # Point out the starting position
-            scatter!(p, [x[1],], [y[1],]; label="");
+            scatter!(p, [x[1],], [y[1],]; label = "")
 
             # Save the figure as PDF and PNG
             savefig(p, joinpath(output_dir, "$(name) (Orbit, XY)$(postfix).pdf"))
@@ -103,16 +109,16 @@ for path in readdir("$(@__DIR__)/../data/output"; join=true)
 
             # Plot the total energy over time
             p = plot(
-                0.0:(h * 100 / 1000):(h * (length(e) - 1) / 1000),
+                0.0:(h*100/1000):(h*(length(e)-1)/1000),
                 e[1:100:end];
-                label="",
-                title=name,
-                xlabel=L"T \;\, [\mathrm{Gyr}]",
-                ylabel=L"E \; [\mathrm{km^2 \, s^{-2}}]"
-            );
+                label = "",
+                title = name,
+                xlabel = L"T \;\, [\mathrm{Gyr}]",
+                ylabel = L"E \; [\mathrm{km^2 \, s^{-2}}]"
+            )
 
             # Point out the initial value
-            scatter!(p, [0.0,], [e[1],]; label="");
+            scatter!(p, [0.0,], [e[1],]; label = "")
 
             # Save the figure as PDF and PNG
             savefig(p, joinpath(output_dir, "$(name) (Total energy)$(postfix).pdf"))
