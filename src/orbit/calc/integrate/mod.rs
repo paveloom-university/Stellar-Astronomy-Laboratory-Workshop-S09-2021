@@ -125,13 +125,13 @@ fn f_z(p_z: F) -> F {
 /// Calculate the right-hand part of the equation for
 /// $ \dot{p_r} $ $\[ \text{kpc} \\, \text{Myr}^{-2} \]$
 fn f_p_r(r: F, z: F, p_psi: F, model: &dyn Model) -> F {
-    -model.phi_dr(r, z) + p_psi.powi(2) / r.powi(3)
+    -model.phi_dr(r, z).to_kpc_per_myr_2() + p_psi.powi(2) / r.powi(3)
 }
 
 /// Calculate the right-hand part of the equation for
 /// $ \dot{p_z} $ $\[ \text{kpc} \\, \text{Myr}^{-2} \]$
 fn f_p_z(r: F, z: F, model: &dyn Model) -> F {
-    -model.phi_dz(r, z)
+    -model.phi_dz(r, z).to_kpc_per_myr_2()
 }
 
 /// Calculate the value of radial velocity

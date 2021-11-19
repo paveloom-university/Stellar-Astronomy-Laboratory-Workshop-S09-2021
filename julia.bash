@@ -13,7 +13,7 @@ else
     if ! lsof -i tcp:${PORT} | grep -q julia ; then
         # Start it up
         julia -t auto --startup-file=no --project=${SCRIPT_PATH} -e "using DaemonMode; serve(${PORT}; async=true)" &
-        sleep .5
+        sleep 1
     fi
     # Run the script
     julia --startup-file=no --project=${SCRIPT_PATH} -e "using DaemonMode; runargs(${PORT})" $@

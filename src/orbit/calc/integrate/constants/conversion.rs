@@ -15,7 +15,7 @@ const KM_PER_S_TO_KPC_PER_MYR: F = 0.001_022_73;
 /// This constant is a replacement of the gravitational constant $ G $
 /// (see Appendix A in Irrgang et al.(2013)). Since $ G $ can be taken
 /// out of any potential, it is also used for potential differentials.
-const HUNDREDS_KM_PER_S_2_TO_KPC_PER_MYR_2: F = 1.045_897_218_694_908e-4;
+const HUNDREDS_KM_2_PER_S_2_TO_KPC_2_PER_MYR_2: F = 1.045_897_218_694_908e-4;
 /// A constant to convert $ \text{Myr} $ to seconds
 const MYR_TO_S: F = 3.155_695_2e13;
 /// A constant to convert $ \text{km} $ to $ \text{kpc} $
@@ -49,7 +49,7 @@ impl Conversions for F {
         self * KM_PER_S_TO_KPC_PER_MYR
     }
     fn to_kpc_per_myr_2(&self) -> Self::Output {
-        self * HUNDREDS_KM_PER_S_2_TO_KPC_PER_MYR_2
+        self * HUNDREDS_KM_2_PER_S_2_TO_KPC_2_PER_MYR_2
     }
     fn to_seconds(&self) -> Self::Output {
         self * MYR_TO_S
