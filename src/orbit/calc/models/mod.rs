@@ -1,6 +1,6 @@
 //! This module provides the models of the Galactic potential
 //!
-//! There are two types of models provided, depending on how they represent
+//! There are two groups of models provided, depending on how they represent
 //! the Galactic potential:
 //! 1. A sum of potentials: bulge + disk + halo;
 //! 2. A sum of potentials: bulge + thin disk + thick disk + halo.
@@ -12,13 +12,12 @@
 //! | # | Bulge | Disk | Halo |
 //! | - | :---: | :--: | :--: |
 //! | 1 | P     | MN   | NFW  |
-//! | 2 | MN    | MN   | NFW  |
 //!
 //! # Group 2
 //!
 //! | # | Bulge | Thin Disk | Thick Disk | Halo |
 //! | - | :---: | :-------: | :--------: | :--: |
-//! | 3 | P     | ?         | ?          | NFW  |
+//! | 2 | P     | ?         | ?          | NFW  |
 
 mod m1;
 mod model;

@@ -6,6 +6,3 @@
 
 # Rust: Builds
 /target
-
-# Julia: Manifest files
-Manifest.toml

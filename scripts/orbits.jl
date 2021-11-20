@@ -31,11 +31,15 @@ end
 # Define the paths to output directories
 CURRENT_DIR = @__DIR__
 ROOT_DIR = basename(CURRENT_DIR) == "scripts" ? dirname(CURRENT_DIR) : CURRENT_DIR
-DATA_OUTPUT = joinpath(ROOT_DIR, "data", "output")
-PLOTS_OUTPUT = joinpath(ROOT_DIR, "plots")
+DATA_OUTPUT_DIR = joinpath(ROOT_DIR, "data", "output")
+PLOTS_DIR = joinpath(ROOT_DIR, "plots")
+ORBITS_DIR = joinpath(PLOTS_DIR, "orbits")
+
+# Make sure the needed directories exist
+mkpath(ORBITS_DIR)
 
 # For each path in the output directory
-for path in readdir(DATA_OUTPUT; join = true)
+for path in readdir(DATA_OUTPUT_DIR; join = true)
     # Check if the path is a directory
     if isdir(path)
         # Define the paths to the binary files
@@ -50,12 +54,8 @@ for path in readdir(DATA_OUTPUT; join = true)
             name = basename(path)
 
             # Define the output directory for plots
-            output_dir = joinpath(PLOTS_OUTPUT, name)
-
-            # Create a directory for the object in the plots folder
-            if !isdir(output_dir)
-                mkdir(output_dir)
-            end
+            output_dir = joinpath(ORBITS_DIR, name)
+            mkpath(output_dir)
 
             # Prepare the arrays
             r = Vector{Float64}(undef, n + 1)
