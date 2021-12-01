@@ -28,7 +28,8 @@ const M_H: F = 12474.0;
 const A_H: F = 7.7;
 
 /// This model uses the Plummer potential for bulge, the Miyamoto & Nagai potential
-/// for disk, and the Navarro-Frenk-White potential for halo. See all models [here](super).
+/// for disk, and the Navarro-Frenk-White potential for halo. The values of the parameters
+/// are taken from Bajkova, Bobylev (2020, v1).
 pub struct M1 {}
 
 impl Model for M1 {

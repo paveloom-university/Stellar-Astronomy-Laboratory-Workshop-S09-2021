@@ -9,15 +9,15 @@
 //!
 //! # Group 1
 //!
-//! | # | Bulge | Disk | Halo |
-//! | - | :---: | :--: | :--: |
-//! | 1 | P     | MN   | NFW  |
+//! | # | Bulge | Disk | Halo | Values of the parameters    |
+//! | - | :---: | :--: | :--: | :-------------------------: |
+//! | 1 | P     | MN   | NFW  | Bajkova, Bobylev (2020, v1) |
 //!
 //! # Group 2
 //!
-//! | # | Bulge | Thin Disk | Thick Disk | Halo |
-//! | - | :---: | :-------: | :--------: | :--: |
-//! | 2 | P     | ?         | ?          | NFW  |
+//! | # | Bulge | Thin Disk  | Thick Disk  | Halo | Values of the parameters                         |
+//! | - | :---: | :--------: | :---------: | :--: | :----------------------------------------------: |
+//! | 2 | P     | MN         | MN          | NFW  | Pouliasis et al. (2017, model I) + Eilers (2018) |
 
 mod m1;
 mod model;

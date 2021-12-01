@@ -1,4 +1,4 @@
-# Notices
+## Notices
 
 Git mirrors:
 - [Codeberg](https://codeberg.org/paveloom-university/Stellar-Astronomy-Laboratory-Workshop-S09-2021)
@@ -10,12 +10,16 @@ Reference mirrors:
 - [GitHub Pages](https://paveloom-university.github.io/Stellar-Astronomy-Laboratory-Workshop-S09-2021)
 - [GitLab Pages](https://paveloom-g.gitlab.io/university/s09-2021/stellar-astronomy-laboratory-workshop)
 
+### KaTeX
+
 To build this crate's documentation with [KaTeX](https://katex.org/) support, run:
 
 ```bash
 cargo doc
 RUSTDOCFLAGS="--html-in-header assets/katex-header.html" cargo doc --no-deps --open
 ```
+
+### Julia
 
 This project provides [Julia](https://julialang.org) scripts. Make sure to use the project files (`Project.toml`) when running them:
 
@@ -37,7 +41,9 @@ To kill the daemon run
 ./julia.bash kill
 ```
 
-This project also provides Pluto notebooks. You can interact with them in the web interface:
+### Pluto
+
+This project provides Pluto notebooks. You can interact with them in the web interface:
 
 ```bash
 julia --project=. -e "using Pkg; Pkg.instantiate()"
@@ -53,5 +59,9 @@ Alternatively, you can run them as scripts:
 
 ```
 julia --project=. -e "using Pkg; Pkg.instantiate()"
-julia --project=. notebooks/notebook.jl
+julia --project=. notebooks/pluto/notebook.jl
 ```
+
+### wxMaxima
+
+This project provides a [wxMaxima](https://wxmaxima-developers.github.io/wxmaxima/) notebook.

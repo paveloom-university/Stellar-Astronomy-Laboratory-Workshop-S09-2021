@@ -4,7 +4,7 @@
 //! Here's a list of available potentials and their R and Z derivatives.
 //! Note that $ r^2 = X^2 + Y^2 + Z^2 = R^2 + Z^2 $.
 //!
-//! 1. Plummer potential with parameters $ (M, b) $:
+//! 1. Plummer (P) potential with parameters $ (M, b) $:
 //!
 //! $$
 //! \Phi(r(R, Z)) = - \frac{M}{(r^2 + b^2)^{1/2}};
@@ -20,7 +20,7 @@
 //! \frac{M Z}{(R^2 + Z^2 + b^2)^{3/2}}.
 //! $$
 //!
-//! 2. Miyamoto & Nagai potential with parameters $ (M, a, b) $:
+//! 2. Miyamoto & Nagai (MN) potential with parameters $ (M, a, b) $:
 //!
 //! $$
 //! \Phi(R, Z) = - \frac{M}{\left[ R^2 +
@@ -40,7 +40,7 @@
 //! \sqrt{b^2 + Z^2} \right)^2 \right)^{3/2}}.
 //! $$
 //!
-//! 3. Navarro-Frenk-White potential with parameters $ (M, a) $:
+//! 3. Navarro-Frenk-White (NFW) potential with parameters $ (M, a) $:
 //!
 //! $$
 //! \Phi(r(R, Z)) = - \frac{M}{r} \ln{\left( 1 +
