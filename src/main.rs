@@ -21,6 +21,9 @@ use orbit::Orbit;
 /// The floating point type used across the program
 pub type F = f64;
 
+/// The number $ \pi $ casted to the floating point type
+pub const PI: F = std::f64::consts::PI;
+
 /// The integer type used across the program
 pub type I = usize;
 

@@ -1,10 +1,46 @@
-## Notices
+## How to reproduce the results
 
-Git mirrors:
+1. Check out this repository:
+
 - [Codeberg](https://codeberg.org/paveloom-university/Stellar-Astronomy-Laboratory-Workshop-S09-2021)
 - [GitHub](https://github.com/paveloom-university/Stellar-Astronomy-Laboratory-Workshop-S09-2021)
 - [GitLab](https://gitlab.com/paveloom-g/university/s09-2021/stellar-astronomy-laboratory-workshop)
 - [SourceHut](https://sr.ht/~paveloom/Stellar-Astronomy-Laboratory-Workshop-S09-2021/)
+
+2. Integrate the orbits for 5 Gyr backward using both models:
+
+    ```bash
+    cargo run --release -- --model 1 -n 500000 -h -0.01 -f=x,y,r,z -o data/output/M1 data/input/initial.dat
+    cargo run --release -- --model 2 -n 500000 -h -0.01 -f=x,y,r,z -o data/output/M2 data/input/initial.dat
+    ```
+
+3. Generate plots of the orbits in XY and RZ planes:
+
+    3.1. Instantiate the Julia project:
+
+    ```bash
+    julia --project=. -e "using Pkg; Pkg.instantiate()"
+    ```
+
+    3.2. Run the script:
+
+    ```bash
+    julia --project=. scripts/orbits.jl
+    ```
+
+    *or*
+
+    ```bash
+    ./julia.bash scripts/orbits.jl
+    ```
+
+    The latter will start a Julia [daemon](https://github.com/dmolina/DaemonMode.jl) in the background. To kill it, run
+
+    ```bash
+    ./julia.bash kill
+    ```
+
+## Notices
 
 Reference mirrors:
 - [GitHub Pages](https://paveloom-university.github.io/Stellar-Astronomy-Laboratory-Workshop-S09-2021)

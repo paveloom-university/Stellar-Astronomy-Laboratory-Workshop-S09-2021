@@ -73,20 +73,20 @@ begin
     B_B_S = @bind B_B NumberField(0.0:0.001:2.0, default = 0.3)
 
     # Thin disk
-    M_THIN_S = @bind M_THIN NumberField(
+    M_THIN_D_S = @bind M_THIN_D NumberField(
         1500.0:0.001:12903.0,
         default = 1700.0,
     )
-    A_THIN_S = @bind A_THIN NumberField(1.0:0.001:20.0, default = 5.3)
-    B_THIN_S = @bind B_THIN NumberField(0.1:0.001:16.0, default = 0.25)
+    A_THIN_D_S = @bind A_THIN_D NumberField(1.0:0.001:20.0, default = 5.3)
+    B_THIN_D_S = @bind B_THIN_D NumberField(0.1:0.001:16.0, default = 0.25)
 
 	# Thick disk
-	M_THICK_S = @bind M_THICK NumberField(
+	M_THICK_D_S = @bind M_THICK_D NumberField(
         1500.0:0.001:12903.0,
         default = 1700.0,
     )
-    A_THICK_S = @bind A_THICK NumberField(1.0:0.001:20.0, default = 2.6)
-    B_THICK_S = @bind B_THICK NumberField(0.1:0.001:16.0, default = 0.8)
+    A_THICK_D_S = @bind A_THICK_D NumberField(1.0:0.001:20.0, default = 2.6)
+    B_THICK_D_S = @bind B_THICK_D NumberField(0.1:0.001:16.0, default = 0.8)
 	
     # Halo
     M_H_S = @bind M_H NumberField(
@@ -97,10 +97,10 @@ begin
 
     md"""
     ``M_\text{b}``: $(M_B_S) ``a_\text{b}``: $(A_B_S) ``b_\text{b}``: $(B_B_S) \
-    ``M_{\text{thin}}``: $(M_THIN_S) ``M_{\text{thick}}``: $(M_THICK_S) \
-    ``a_{thin}``: $(A_THIN_S) ``a_{thick}``: $(A_THICK_S) \
-    ``b_{thin}``: $(B_THIN_S) ``b_{thick}``: $(B_THICK_S) \
-    ``M_h``: $(M_H_S) ``a_h``: $(A_H_S)
+    ``M_{\text{thin}}``: $(M_THIN_D_S) ``M_{\text{thick}}``: $(M_THICK_D_S) \
+    ``a_{\text{thin}}``: $(A_THIN_D_S) ``a_{\text{thick}}``: $(A_THICK_D_S) \
+    ``b_{\text{thin}}``: $(B_THIN_D_S) ``b_{\text{thick}}``: $(B_THICK_D_S) \
+    ``M_\text{h}``: $(M_H_S) ``a_\text{h}``: $(A_H_S)
     """
 end
 
@@ -138,8 +138,8 @@ begin
     ``[ 100 \\, \\text{km} \\, \\text{s}^{-2} ]``"
     function phi_dr(r, z)::F
         return miyamoto_nagai_phi_dr(r, z, M_B, A_B, B_B) +
-               miyamoto_nagai_phi_dr(r, z, M_THIN, A_THIN, B_THIN) +
-		       miyamoto_nagai_phi_dr(r, z, M_THICK, A_THICK, B_THICK) +
+               miyamoto_nagai_phi_dr(r, z, M_THIN_D, A_THIN_D, B_THIN_D) +
+		       miyamoto_nagai_phi_dr(r, z, M_THICK_D, A_THICK_D, B_THICK_D) +
 		       navarro_frenk_white_phi_dr(r, z, M_H, A_H)
     end
 
@@ -196,7 +196,7 @@ $(PlutoUI.LocalResource(joinpath(ROOT_DIR, "assets", "Rotation curve of the seco
 # ╔═╡ Cell order:
 # ╟─2f0ce4ef-4c45-4175-a9a7-df70cb268629
 # ╟─52342993-f23a-4a50-b3e0-e9e4b032f1cf
-# ╟─1fa86bf7-e1dc-4cd1-9ff0-73c14225ef2c
+# ╠═1fa86bf7-e1dc-4cd1-9ff0-73c14225ef2c
 # ╟─a5d896ff-570f-49a9-adf0-19f11cb899e0
 # ╟─d4ba276c-a578-4a64-9f54-c33c81225a0b
 # ╟─bb727eda-9d7c-48e2-bac6-23e90aa6aab1
