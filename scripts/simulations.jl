@@ -1,5 +1,62 @@
 # This is a Julia script to
-# plot the integrated orbits
+# plot the simulated orbits
+
+"Check if the value of the option is the last argument"
+function check_last(i)
+    if i + 1 == length(ARGS)
+        println("The last argument should be the input directory.")
+        exit(1)
+    end
+end
+
+# Define default values for optional arguments
+POSTFIX = ""
+
+# Parse the options
+for i in eachindex(ARGS)
+    # A number of integration iterations used
+    if ARGS[i] == "-n"
+        check_last(i)
+        try
+            global N = parse(UInt, ARGS[i+1])
+        catch
+            println("Couldn't parse the value of the `-n` argument.")
+            exit(1)
+        end
+    end
+    # A number of simulation iterations
+    if ARGS[i] == "-s"
+        check_last(i)
+        try
+            global S = parse(UInt, ARGS[i+1])
+        catch
+            println("Couldn't parse the value of the `-h` argument.")
+            exit(1)
+        end
+    end
+    # A postfix for the names of output files
+    if ARGS[i] == "--postfix"
+        check_last(i)
+        try
+            global POSTFIX = " ($(ARGS[i+1]))"
+        catch
+            println("Couldn't parse the value of the `--postfix` argument.")
+            exit(1)
+        end
+    end
+end
+
+# Check for required arguments (exc)
+if !@isdefined(N) || !@isdefined(S) || length(ARGS) == 0
+    println("""
+        Usage:
+        julia --project=. scripts/simulations.jl -n <N> -s <S> <input> [--postfix <POSTFIX>]"""
+    )
+    exit(1)
+end
+
+# Define the input directory
+INPUT_DIR = ARGS[end]
 
 println('\n', " "^4, "> Loading the packages...")
 
@@ -13,41 +70,25 @@ gr()
 # Change some of the default parameters for plots
 default(fontfamily = "Computer Modern", dpi = 300, legend = :topright)
 
-# Define the number of integration iterations used
-n = 100000
-
-# Define the time step used
-h = -0.01
-
-# Define the number of simulation iterations
-s = 200
-
 # Define the number of minor ticks for heatmaps
 minorticks = 8
-
-# Define postfix for names of files
-postfix = if length(ARGS) > 0
-    " ($(ARGS[1]))"
-else
-    ""
-end
 
 # Define the paths to output directories
 CURRENT_DIR = @__DIR__
 ROOT_DIR = basename(CURRENT_DIR) == "scripts" ? dirname(CURRENT_DIR) : CURRENT_DIR
-DATA_OUTPUT_DIR = joinpath(ROOT_DIR, "data", "output")
 PLOTS_DIR = joinpath(ROOT_DIR, "plots")
 SIMULATIONS_DIR = joinpath(PLOTS_DIR, "simulations")
+OUTPUT_DIR = joinpath(SIMULATIONS_DIR, basename(INPUT_DIR))
 
 # Make sure the needed directories exist
-mkpath(SIMULATIONS_DIR)
+mkpath(OUTPUT_DIR)
 
-# Plot a heatmap from the coordinates data
-function plot_heatmap(name, output_dir, x, y, xlabel, ylabel, plane)
+"Plot a heatmap from the coordinates data"
+function plot_heatmap(name, object_dir, x, y, xlabel, ylabel, plane)
     # Plot the orbit
     p = plot(
-        x[1:100:(n+1)],
-        y[1:100:(n+1)];
+        x[1:100:(N+1)],
+        y[1:100:(N+1)];
         label = "",
         title = name,
         xlabel,
@@ -83,11 +124,11 @@ function plot_heatmap(name, output_dir, x, y, xlabel, ylabel, plane)
     m .= 0
 
     # For each simulation iteration
-    for i = 1:(s+1)
+    for i = 1:(S+1)
         # Get a copy of matrix on the previous step
         mₚ .= m
         # For each pair of the coordinates
-        for j = ((i-1)*n+i):(i*n+i)
+        for j = ((i-1)*N+i):(i*N+i)
             # Check if the orbit is in the limits of the grid
             if (r₁[begin] ≤ x[j] ≤ r₁[end]) && (r₂[begin] ≤ y[j] ≤ r₂[end])
                 # Get the indices of the square
@@ -107,7 +148,7 @@ function plot_heatmap(name, output_dir, x, y, xlabel, ylabel, plane)
         p,
         r₁,
         r₂,
-        m / (s + 1);
+        m / (S + 1);
         color = cgrad([RGBA{Float64}(0.0, 0.0, 0.0, 0.0); cgrad(:inferno)[2:end]]),
         xticks = [xticks(p)[1][1][begin] - h₁ * minorticks; xticks(p)[1][1]; xticks(p)[1][1][end] + h₁ * 8],
         yticks = [yticks(p)[1][1][begin] - h₂ * minorticks; yticks(p)[1][1]; yticks(p)[1][1][end] + h₂ * 8]
@@ -116,8 +157,8 @@ function plot_heatmap(name, output_dir, x, y, xlabel, ylabel, plane)
     # Redraw the orbit
     plot!(
         p,
-        x[1:100:(n+1)],
-        y[1:100:(n+1)];
+        x[1:100:(N+1)],
+        y[1:100:(N+1)];
         label = "",
         color = palette(:default)[1]
     )
@@ -126,12 +167,12 @@ function plot_heatmap(name, output_dir, x, y, xlabel, ylabel, plane)
     scatter!(p, [x[1],], [y[1],]; label = "")
 
     # Save the figure as PDF and PNG
-    savefig(p, joinpath(output_dir, "$(name) (Simulated orbits, $(plane))$(postfix).pdf"))
-    savefig(p, joinpath(output_dir, "$(name) (Simulated orbits, $(plane))$(postfix).png"))
+    savefig(p, joinpath(object_dir, "$(name) (Simulated orbits, $(plane))$(POSTFIX).pdf"))
+    savefig(p, joinpath(object_dir, "$(name) (Simulated orbits, $(plane))$(POSTFIX).png"))
 end
 
 # For each path in the output directory
-for path in readdir(DATA_OUTPUT_DIR; join = true)
+for path in readdir(INPUT_DIR; join = true)
     # Check if the path is a directory
     if isdir(path)
         # Define the paths to the binary files
@@ -139,42 +180,30 @@ for path in readdir(DATA_OUTPUT_DIR; join = true)
         z_path = joinpath(path, "z.bin")
         x_path = joinpath(path, "x.bin")
         y_path = joinpath(path, "y.bin")
-        e_path = joinpath(path, "e.bin")
         apo_path = joinpath(path, "apo.bin")
         peri_path = joinpath(path, "peri.bin")
-        # Check if the data files exist
-        if isfile(r_path) && isfile(z_path) && isfile(apo_path) && isfile(peri_path)
-            # Get the ID of the object
-            name = basename(path)
 
-            # Define the output directories for plots
-            output_dir = joinpath(SIMULATIONS_DIR, name)
-            mkpath(output_dir)
+        # Get the ID of the object
+        name = basename(path)
 
-            # Prepare the arrays
-            r = Vector{Float64}(undef, (n + 1) * (s + 1))
-            z = Vector{Float64}(undef, (n + 1) * (s + 1))
-            x = Vector{Float64}(undef, (n + 1) * (s + 1))
-            y = Vector{Float64}(undef, (n + 1) * (s + 1))
-            e = Vector{Float64}(undef, (n + 1) * (s + 1))
-            apo = Vector{Float64}(undef, (s + 1))
-            peri = Vector{Float64}(undef, (s + 1))
+        # Define the object directory
+        object_dir = joinpath(OUTPUT_DIR, name)
+        mkpath(object_dir)
+
+        # Plot the histogram of apocentric distances if the corresponding data file exists
+        if isfile(apo_path) && isfile(peri_path)
+            # Prepare the array
+            apo = Vector{Float64}(undef, (S + 1))
 
             # Read the data
-            read!(r_path, r)
-            read!(z_path, z)
-            read!(x_path, x)
-            read!(y_path, y)
-            read!(e_path, e)
             read!(apo_path, apo)
-            read!(peri_path, peri)
 
-            println(" "^4, "> Plotting the data from \"$(name)\"...")
+            println(" "^4, "> Plotting the histogram of apocentric distances from \"$(name)\"...")
 
             # Calculate the number of bins
-            bins = ceil(Int, (maximum(apo) - minimum(apo)) / (3.49 * std(apo) / s^(1 / 3)) * 1.5)
+            bins = ceil(Int, (maximum(apo) - minimum(apo)) / (3.49 * std(apo) / S^(1 / 3)) * 1.5)
 
-            # Plot the histogram of the apocentric distances
+            # Plot the histogram of apocentric distances
             p = histogram(
                 apo;
                 bins,
@@ -188,13 +217,26 @@ for path in readdir(DATA_OUTPUT_DIR; join = true)
             vline!(p, [apo[1],]; label = "", lw = 1.5)
 
             # Save the figure as PDF and PNG
-            savefig(p, joinpath(output_dir, "$(name) (Apocentric distances)$(postfix).pdf"))
-            savefig(p, joinpath(output_dir, "$(name) (Apocentric distances)$(postfix).png"))
+            savefig(p, joinpath(object_dir, "$(name) (Apocentric distances)$(POSTFIX).pdf"))
+            savefig(p, joinpath(object_dir, "$(name) (Apocentric distances)$(POSTFIX).png"))
+
+
+        end
+
+        # Plot the histogram of pericentric distances if the corresponding data file exists
+        if isfile(peri_path)
+            # Prepare the array
+            peri = Vector{Float64}(undef, (S + 1))
+
+            # Read the data
+            read!(peri_path, peri)
 
             # Calculate the number of bins
-            bins = ceil(Int, (maximum(peri) - minimum(peri)) / (3.49 * std(peri) / s^(1 / 3)) * 1.5)
+            bins = ceil(Int, (maximum(peri) - minimum(peri)) / (3.49 * std(peri) / S^(1 / 3)) * 1.5)
 
-            # Plot the histogram of the pericentric distances
+            println(" "^4, "> Plotting the histogram of pericentric distances from \"$(name)\"...")
+
+            # Plot the histogram of pericentric distances
             p = histogram(
                 peri;
                 bins,
@@ -208,12 +250,36 @@ for path in readdir(DATA_OUTPUT_DIR; join = true)
             vline!(p, [peri[1],]; label = "", lw = 1.5)
 
             # Save the figure as PDF and PNG
-            savefig(p, joinpath(output_dir, "$(name) (Pericentric distances)$(postfix).pdf"))
-            savefig(p, joinpath(output_dir, "$(name) (Pericentric distances)$(postfix).png"))
+            savefig(p, joinpath(object_dir, "$(name) (Pericentric distances)$(POSTFIX).pdf"))
+            savefig(p, joinpath(object_dir, "$(name) (Pericentric distances)$(POSTFIX).png"))
+        end
 
-            # Plot the heatmaps of simulated orbits in the RZ- and XY-planes
-            plot_heatmap(name, output_dir, r, z, L"R \; [\mathrm{kpc}]", L"Z \; [\mathrm{kpc}]", "RZ")
-            plot_heatmap(name, output_dir, x, y, L"X \; [\mathrm{kpc}]", L"Y \;\, [\mathrm{kpc}]", "XY")
+        # Plot the heatmap of simulated orbits in the RZ plane if the corresponding data files exist
+        if isfile(r_path) && isfile(z_path)
+            # Prepare the arrays
+            r = Vector{Float64}(undef, (N + 1) * (S + 1))
+            z = Vector{Float64}(undef, (N + 1) * (S + 1))
+
+            # Read the data
+            read!(r_path, r)
+            read!(z_path, z)
+
+            println(" "^4, "> Plotting the heatmap of simulated orbits in the RZ plane from \"$(name)\"...")
+            plot_heatmap(name, object_dir, r, z, L"R \; [\mathrm{kpc}]", L"Z \; [\mathrm{kpc}]", "RZ")
+        end
+
+        # Plot the heatmap of simulated orbits in the XY plane if the corresponding data files exist
+        if isfile(x_path) && isfile(y_path)
+            # Prepare the arrays
+            x = Vector{Float64}(undef, (N + 1) * (S + 1))
+            y = Vector{Float64}(undef, (N + 1) * (S + 1))
+
+            # Read the data
+            read!(x_path, x)
+            read!(y_path, y)
+
+            println(" "^4, "> Plotting the heatmap of simulated orbits in the XY plane from \"$(name)\"...")
+            plot_heatmap(name, object_dir, x, y, L"X \; [\mathrm{kpc}]", L"Y \;\, [\mathrm{kpc}]", "XY")
         end
     end
 end

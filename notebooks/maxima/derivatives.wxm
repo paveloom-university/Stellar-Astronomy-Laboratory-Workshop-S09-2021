@@ -1,0 +1,50 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 20.12.1 ] */
+/* [wxMaxima: title   start ]
+Galactic potentials and their derivatives
+   [wxMaxima: title   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+get_divs(eq) := block(
+    return([diff(eq, R, 1), diff(eq, Z, 1)])
+)$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: section start ]
+Plummer
+   [wxMaxima: section end   ] */
+
+
+/* [wxMaxima: input   start ] */
+eq1: Φ(R, Z) = - M / sqrt(R^2 + Z^2 + b^2);
+get_divs(eq1);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: section start ]
+Miyamoto-Nagai
+   [wxMaxima: section end   ] */
+
+
+/* [wxMaxima: input   start ] */
+eq2: Φ(R, Z) = - M / sqrt(R^2 + (a + sqrt(Z^2 + b^2))^2);
+get_divs(eq2);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: section start ]
+Navarro-Frenk-White
+   [wxMaxima: section end   ] */
+
+
+/* [wxMaxima: input   start ] */
+eq3: Φ(R, Z) = - M / sqrt(R^2 + Z^2) * log(1 + sqrt(R^2 + Z^2) / a);
+get_divs(eq3);
+/* [wxMaxima: input   end   ] */
+
+
+
+/* Old versions of Maxima abort on loading files that end in a comment. */
+"Created with wxMaxima 20.12.1"$

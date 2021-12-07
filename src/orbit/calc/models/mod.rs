@@ -9,21 +9,23 @@
 //!
 //! # Group 1
 //!
-//! | # | Bulge | Disk | Halo |
-//! | - | :---: | :--: | :--: |
-//! | 1 | P     | MN   | NFW  |
+//! | # | Bulge | Disk | Halo | Values of the parameters    |
+//! | - | :---: | :--: | :--: | :-------------------------: |
+//! | 1 | P     | MN   | NFW  | Bajkova, Bobylev (2020, v1) |
 //!
 //! # Group 2
 //!
-//! | # | Bulge | Thin Disk | Thick Disk | Halo |
-//! | - | :---: | :-------: | :--------: | :--: |
-//! | 2 | P     | ?         | ?          | NFW  |
+//! | # | Bulge | Thin Disk  | Thick Disk  | Halo | Values of the parameters                         |
+//! | - | :---: | :--------: | :---------: | :--: | :----------------------------------------------: |
+//! | 2 | P     | MN         | MN          | NFW  | Pouliasis et al. (2017, model I) + Eilers (2018) |
 
 mod m1;
+mod m2;
 mod model;
 
 pub use m1::M1;
+pub use m2::M2;
 pub use model::Model;
 
 /// An array of models: indices of the items are the same as the indices of the models
-pub const MODELS: &[&dyn Model] = &[&M1 {}];
+pub const MODELS: &[&dyn Model] = &[&M1 {}, &M2 {}];

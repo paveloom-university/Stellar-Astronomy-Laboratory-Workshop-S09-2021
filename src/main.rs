@@ -1,7 +1,7 @@
 //! This binary crate is a command-line utility to integrate the orbits of
 //! globular clusters by providing their initial positions and velocities
-//! and choosing a model of the Galaxy potential. It is based on the paper
-//! of Bajkova & Bobylev ([2020, v1](https://arxiv.org/abs/2008.13624v1)).
+//! and choosing a model of the Galaxy potential. It is mostly based on the
+//! paper of Bajkova & Bobylev ([2020, v1](https://arxiv.org/abs/2008.13624v1)).
 //!
 //! Module documentations:
 //! - [Description of the units conversions before and
@@ -20,6 +20,9 @@ use orbit::Orbit;
 
 /// The floating point type used across the program
 pub type F = f64;
+
+/// The number $ \pi $ casted to the floating point type
+pub const PI: F = std::f64::consts::PI;
 
 /// The integer type used across the program
 pub type I = usize;
