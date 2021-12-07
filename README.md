@@ -25,13 +25,15 @@
     3.2. Run the script:
 
     ```bash
-    julia --project=. scripts/orbits.jl
+    julia --project=. scripts/orbits.jl -n 500000 -h -0.01 data/output/M1
+    julia --project=. scripts/orbits.jl -n 500000 -h -0.01 data/output/M2
     ```
 
     *or*
 
     ```bash
-    ./julia.bash scripts/orbits.jl
+    ./julia.bash scripts/orbits.jl -n 500000 -h -0.01 data/output/M1
+    ./julia.bash scripts/orbits.jl -n 500000 -h -0.01 data/output/M2
     ```
 
     The latter will start a Julia [daemon](https://github.com/dmolina/DaemonMode.jl) in the background. To kill it, run
@@ -39,6 +41,8 @@
     ```bash
     ./julia.bash kill
     ```
+
+    > ***HINT:*** See the results in `plots/orbits`.
 
 ## Notices
 
