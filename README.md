@@ -9,6 +9,15 @@
 
 2. Integrate the orbits for 5 Gyr backward using both models:
 
+    2.1. Prepare the output directories:
+
+    ```bash
+    mkdir -p data/output/M1
+    mkdir -p data/output/M2
+    ```
+
+    2.2. Build an run the program
+
     ```bash
     cargo run --release -- --model 1 -n 500000 -h -0.01 -f=x,y,r,z -o data/output/M1 data/input/initial.dat
     cargo run --release -- --model 2 -n 500000 -h -0.01 -f=x,y,r,z -o data/output/M2 data/input/initial.dat
@@ -43,6 +52,37 @@
     ```
 
     > ***HINT:*** See the results in `plots/orbits`.
+
+4. Run 200 Monte Carlo simulations for 1 Gyr backward using both models:
+
+    ```bash
+    cargo run --release -- --model 1 -n 100000 -h -0.01 -s 200 --simulate -f=r,z,x,y,apo,peri -o data/output/M1 data/input/initial.dat
+    cargo run --release -- --model 2 -n 100000 -h -0.01 -s 200 --simulate -f=r,z,x,y,apo,peri -o data/output/M2 data/input/initial.dat
+    ```
+
+    > ***NOTE:*** This will take some time and quite a bit of disk space.
+
+5. Generate histograms of apocentric and pericentric distances and plots of the simulated orbits:
+
+    ```bash
+    julia --project=. scripts/simulations.jl -n 100000 -s 200 data/output/M1
+    julia --project=. scripts/simulations.jl -n 100000 -s 200 data/output/M2
+    ```
+
+    *or*
+
+    ```bash
+    ./julia.bash scripts/simulations.jl -n 100000 -s 200 data/output/M1
+    ./julia.bash scripts/simulations.jl -n 100000 -s 200 data/output/M2
+    ```
+
+    The latter will start a Julia [daemon](https://github.com/dmolina/DaemonMode.jl) in the background. To kill it, run
+
+    ```bash
+    ./julia.bash kill
+    ```
+
+    > ***HINT:*** See the results in `plots/simulations`.
 
 ## Notices
 

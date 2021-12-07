@@ -50,7 +50,7 @@ end
 if !@isdefined(N) || !@isdefined(H) || length(ARGS) == 0
     println("""
         Usage:
-        julia --project=. scripts/orbits.jl -n <N> -h <H> <input> [--postfix <POSTFIX]>"""
+        julia --project=. scripts/orbits.jl -n <N> -h <H> <input> [--postfix <POSTFIX>]"""
     )
     exit(1)
 end
