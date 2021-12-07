@@ -4,7 +4,8 @@
 //! paper of Bajkova & Bobylev ([2020, v1](https://arxiv.org/abs/2008.13624v1)).
 //!
 //! Module documentations:
-//! - [Description of the units conversions before and
+//! - [Command-line interface](crate::cli)
+//! - [Description of units conversions before and
 //!   after the integration](crate::orbit::calc::integrate)
 //! - [A list of available potentials and their
 //!   derivatives](crate::orbit::calc::potentials)
@@ -12,7 +13,7 @@
 
 use std::path::PathBuf;
 
-mod cli;
+pub mod cli;
 pub mod orbit;
 
 use orbit::calc::models::MODELS;
@@ -68,15 +69,11 @@ fn main() {
     /// Print general information before the integration process begins
     macro_rules! info {
         () => {
-            println!("{:1$}h = {2}", "", PADDING + 2, h);
-            println!("{:1$}n = {2}", "", PADDING + 2, n);
             if rev {
-                println!("{:1$}\nReverse mode enabled.", "", PADDING + 2);
+                println!("{:1$}Reverse mode enabled.\n", "", PADDING + 2);
             } else if sim {
-                println!("{:1$}s = {2}\n", "", PADDING + 2, s);
-                println!("{:1$}Simulation mode enabled.", "", PADDING + 2);
+                println!("{:1$}Simulation mode enabled.\n", "", PADDING + 2);
             }
-            println!();
         };
     }
 

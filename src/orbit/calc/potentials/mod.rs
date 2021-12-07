@@ -1,5 +1,5 @@
-//! This module provides realizations for
-//! different models of Galactic potential
+//! This module provides models for
+//! components of the Galactic potential
 //!
 //! Here's a list of available potentials and their R and Z derivatives.
 //! Note that $ r^2 = X^2 + Y^2 + Z^2 = R^2 + Z^2 $.

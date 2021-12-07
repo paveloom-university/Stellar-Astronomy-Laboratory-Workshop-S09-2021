@@ -16,7 +16,7 @@
     mkdir -p data/output/M2
     ```
 
-    2.2. Build an run the program
+    2.2. Build and run the program
 
     ```bash
     cargo run --release -- --model 1 -n 500000 -h -0.01 -f=x,y,r,z -o data/output/M1 data/input/initial.dat

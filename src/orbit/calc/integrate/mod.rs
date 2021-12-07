@@ -1,4 +1,4 @@
-//! This module provides routines for orbit integration
+//! This module provides routines for the orbit integration
 //!
 //! Here is a quick breakdown of what is going on (see
 //! Bajkova & Bobylev ([2020, v1](https://arxiv.org/abs/2008.13624v1))

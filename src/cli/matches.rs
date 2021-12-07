@@ -199,11 +199,22 @@ fn sim() -> Arg<'static, 'static> {
 }
 
 /// Define the CLI of the program, return the matched arguments
+#[must_use]
 pub fn get() -> ArgMatches<'static> {
     clap::app_from_crate!()
         .help_message("Print help information")
         .version_message("Print version information")
-        .after_help("Documentation: ???\nReference: ???")
+        .after_help(
+            "Documentation:\n\
+             - https://codeberg.org/paveloom-university/Stellar-Astronomy-Laboratory-Workshop-S09-2021/src/branch/main/README.md\n\
+             - https://github.com/paveloom-university/Stellar-Astronomy-Laboratory-Workshop-S09-2021/blob/main/README.md\n\
+             - https://gitlab.com/paveloom-g/university/s09-2021/stellar-astronomy-laboratory-workshop/-/blob/main/README.md\n\
+             - https://git.sr.ht/~paveloom/Stellar-Astronomy-Laboratory-Workshop-S09-2021/tree/main/item/README.md\n\
+             \n\
+             Reference:\n\
+             - https://paveloom-university.github.io/Stellar-Astronomy-Laboratory-Workshop-S09-2021\n\
+             - https://paveloom-g.gitlab.io/university/s09-2021/stellar-astronomy-laboratory-workshop",
+        )
         .args(&[
             model(),
             n(),

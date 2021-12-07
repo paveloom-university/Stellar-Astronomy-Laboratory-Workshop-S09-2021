@@ -1,4 +1,4 @@
-//! This module provides the models of the Galactic potential
+//! This module provides general models of the Galactic potential
 //!
 //! There are two groups of models provided, depending on how they represent
 //! the Galactic potential:
