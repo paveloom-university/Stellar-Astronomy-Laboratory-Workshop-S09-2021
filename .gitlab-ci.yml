@@ -14,4 +14,4 @@ pages:
       PATH=$HOME/.cargo/bin:$PATH ./document.bash
   artifacts:
     paths:
-      - target/doc
+      - public

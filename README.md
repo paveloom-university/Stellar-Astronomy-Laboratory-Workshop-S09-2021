@@ -53,7 +53,7 @@
 
     > ***HINT:*** See the results in `plots/orbits`.
 
-4. Run 200 Monte Carlo simulations for 1 Gyr backward using both models:
+4. Run 200 simulations using the Monte Carlo method for 1 Gyr backward using both models:
 
     ```bash
     cargo run --release -- --model 1 -n 100000 -h -0.01 -s 200 --simulate -f=r,z,x,y,apo,peri -o data/output/M1 data/input/initial.dat
