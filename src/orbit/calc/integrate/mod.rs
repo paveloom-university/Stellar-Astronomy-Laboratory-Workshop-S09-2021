@@ -24,7 +24,11 @@
 //! \text{km} \\, \text{s}^{-1} $ are the Galactocentric distance
 //! and the linear velocity of the Local Standard of Rest around
 //! the Galactic center, $ h_\odot = 16 \\, \text{pc} $ (Bobylev &
-//! Bajkova (2016)) is the height of the Sun above the Galactic plane.
+//! Bajkova (2016)) is the height of the Sun above the Galactic plane,
+//! $ (u_\odot, v_\odot, w_\odot) = (11.1, 12.2, 7.3) \pm
+//! (0.7, 0.5, 0.4) \\, \\text{km s}^{-1} $ (Schönrich et al., 2010)
+//! is the Sun’s peculiar velocity with respect to the Local Standard
+//! of Rest.
 //!
 //! The initial positions $ (R, \psi, Z) $ and their time derivatives
 //! $ (\dot{R}, \dot{\psi}, \dot{Z}) $ are then obtained by the
@@ -69,11 +73,11 @@
 //!
 //! $$
 //! \Pi \\, [\text{km} \\, \text{s}^{-1}] = -U \frac{X}{R} + V \frac{Y}{R} =
-//! -(-p_r \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
-//! \cos{\psi} + (p_\psi / r) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
+//! -(-p_R \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
+//! \cos{\psi} + (p_\psi / R) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
 //! \text{s}^{-1}] \sin{\psi}) \cos{\psi} \\\\
-//! + (p_r \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
-//! \sin{\psi} - (p_\psi / r) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
+//! + (p_R \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
+//! \sin{\psi} - (p_\psi / R) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
 //! \text{s}^{-1}] \cos{\psi}) \sin{\psi},
 //! $$
 //!
@@ -81,11 +85,11 @@
 //!
 //! $$
 //! \Theta \\, [\text{km} \\, \text{s}^{-1}] = U \frac{Y}{R} + V \frac{X}{R} =
-//! (-p_r \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
-//! \cos{\psi} + (p_\psi / r) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
+//! (-p_R \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
+//! \cos{\psi} + (p_\psi / R) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
 //! \text{s}^{-1}] \sin{\psi}) \sin{\psi} \\\\
-//! + (p_r \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
-//! \sin{\psi} - (p_\psi / r) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
+//! + (p_R \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\, \text{s}^{-1}]
+//! \sin{\psi} - (p_\psi / R) \\, [\text{kpc} \\, \text{Myr}^{-1} \rightarrow \text{km} \\,
 //! \text{s}^{-1}] \cos{\psi}) \cos{\psi},
 //! $$
 //!

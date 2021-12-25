@@ -198,7 +198,12 @@ for path in readdir(INPUT_DIR; join = true)
             # Read the data
             read!(apo_path, apo)
 
-            println(" "^4, "> Plotting the histogram of apocentric distances from \"$(name)\"...")
+            println(
+                " "^4, "> Plotting the histogram of apocentric distances from \"$(name)\"...", '\n',
+                " "^4, "  > max: ", maximum(apo), '\n',
+                " "^4, "  > min: ", minimum(apo), '\n',
+                " "^4, "  > no var.: ", apo[1]
+            )
 
             # Calculate the number of bins
             bins = ceil(Int, (maximum(apo) - minimum(apo)) / (3.49 * std(apo) / S^(1 / 3)) * 1.5)
@@ -234,7 +239,12 @@ for path in readdir(INPUT_DIR; join = true)
             # Calculate the number of bins
             bins = ceil(Int, (maximum(peri) - minimum(peri)) / (3.49 * std(peri) / S^(1 / 3)) * 1.5)
 
-            println(" "^4, "> Plotting the histogram of pericentric distances from \"$(name)\"...")
+            println(
+                " "^4, "> Plotting the histogram of pericentric distances from \"$(name)\"...", '\n',
+                " "^4, "  > max: ", maximum(peri), '\n',
+                " "^4, "  > min: ", minimum(peri), '\n',
+                " "^4, "  > no var.: ", peri[1]
+            )
 
             # Plot the histogram of pericentric distances
             p = histogram(
@@ -260,12 +270,15 @@ for path in readdir(INPUT_DIR; join = true)
             r = Vector{Float64}(undef, (N + 1) * (S + 1))
             z = Vector{Float64}(undef, (N + 1) * (S + 1))
 
-            # Read the data
-            read!(r_path, r)
-            read!(z_path, z)
+            try
+                # Read the data
+                read!(r_path, r)
+                read!(z_path, z)
 
-            println(" "^4, "> Plotting the heatmap of simulated orbits in the RZ plane from \"$(name)\"...")
-            plot_heatmap(name, object_dir, r, z, L"R \; [\mathrm{kpc}]", L"Z \; [\mathrm{kpc}]", "RZ")
+                println(" "^4, "> Plotting the heatmap of simulated orbits in the RZ plane from \"$(name)\"...")
+                plot_heatmap(name, object_dir, r, z, L"R \; [\mathrm{kpc}]", L"Z \; [\mathrm{kpc}]", "RZ")
+            catch
+            end
         end
 
         # Plot the heatmap of simulated orbits in the XY plane if the corresponding data files exist
@@ -274,12 +287,15 @@ for path in readdir(INPUT_DIR; join = true)
             x = Vector{Float64}(undef, (N + 1) * (S + 1))
             y = Vector{Float64}(undef, (N + 1) * (S + 1))
 
-            # Read the data
-            read!(x_path, x)
-            read!(y_path, y)
+            try
+                # Read the data
+                read!(x_path, x)
+                read!(y_path, y)
 
-            println(" "^4, "> Plotting the heatmap of simulated orbits in the XY plane from \"$(name)\"...")
-            plot_heatmap(name, object_dir, x, y, L"X \; [\mathrm{kpc}]", L"Y \;\, [\mathrm{kpc}]", "XY")
+                println(" "^4, "> Plotting the heatmap of simulated orbits in the XY plane from \"$(name)\"...")
+                plot_heatmap(name, object_dir, x, y, L"X \; [\mathrm{kpc}]", L"Y \;\, [\mathrm{kpc}]", "XY")
+            catch
+            end
         end
     end
 end

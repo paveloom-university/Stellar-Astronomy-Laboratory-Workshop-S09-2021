@@ -116,7 +116,8 @@ for path in readdir(INPUT_DIR; join = true)
                 label = "",
                 title = name,
                 xlabel = L"R \; [\mathrm{kpc}]",
-                ylabel = L"Z \; [\mathrm{kpc}]"
+                ylabel = L"Z \; [\mathrm{kpc}]",
+                size = (400, 400)
             )
 
             # Point out the starting position
@@ -146,7 +147,8 @@ for path in readdir(INPUT_DIR; join = true)
                 label = "",
                 title = name,
                 xlabel = L"X \; [\mathrm{kpc}]",
-                ylabel = L"Y \;\, [\mathrm{kpc}]"
+                ylabel = L"Y \;\, [\mathrm{kpc}]",
+                size = (400, 400)
             )
 
             # Point out the starting position
@@ -165,7 +167,12 @@ for path in readdir(INPUT_DIR; join = true)
             # Read the data
             read!(e_path, e)
 
-            println(" "^4, "> Plotting the total energy variation from \"$(name)\"...")
+            println(
+                " "^4, "> Plotting the total energy variation from \"$(name)\"...", '\n',
+                " "^4, "  > max: ", maximum(e), '\n',
+                " "^4, "  > min: ", minimum(e), '\n',
+                " "^4, "  > Δ: ", maximum(e) - minimum(e),
+            )
 
             # Plot the total energy variation
             p = plot(
@@ -174,7 +181,8 @@ for path in readdir(INPUT_DIR; join = true)
                 label = "",
                 title = name,
                 xlabel = L"T \;\, [\mathrm{Gyr}]",
-                ylabel = L"E \; [\mathrm{km^2 \, s^{-2}}]"
+                ylabel = L"E \; [\mathrm{km^2 \, s^{-2}}]",
+                size = (400, 400)
             )
 
             # Point out the initial value
