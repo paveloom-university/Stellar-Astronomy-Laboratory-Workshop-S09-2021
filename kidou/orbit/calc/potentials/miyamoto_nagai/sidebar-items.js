@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["phi","Calculate the value of the Miyamoto & Nagai potential"],["phi_dr","Calculate the value of the R derivative of the Miyamoto & Nagai potential"],["phi_dz","Calculate the value of the Z derivative of the Miyamoto & Nagai potential"]]});

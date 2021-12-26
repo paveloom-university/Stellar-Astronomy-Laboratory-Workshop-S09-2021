@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["integrate","This module provides routines for the orbit integration"],["models","This module provides general models of the Galactic potential"],["potentials","This module provides models for components of the Galactic potential"],["simulate","This module provides routines for the Monte Carlo simulation"]]});

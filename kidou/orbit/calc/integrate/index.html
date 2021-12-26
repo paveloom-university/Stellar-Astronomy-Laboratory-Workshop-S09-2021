@@ -1,0 +1,131 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="This module provides routines for the orbit integration"><meta name="keywords" content="rust, rustlang, rust-lang, integrate"><title>kidou::orbit::calc::integrate - Rust</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css"
+  integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js"
+  integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js"
+  integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+      ]
+    });
+  });
+</script>
+
+<style>
+  .katex {
+    font-size: 1em !important;
+  }
+</style>
+
+<style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../kidou/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a><h2 class="location">Module integrate</h2><div class="sidebar-elems"><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#functions">Functions</a></li></ul></div><div id="sidebar-vars" data-name="integrate" data-ty="mod" data-relpath="./"></div><script defer src="./sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../../../index.html">kidou</a>::<wbr><a href="../../index.html">orbit</a>::<wbr><a href="../index.html">calc</a>::<wbr><a class="mod" href="#">integrate</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../../../src/kidou/orbit/calc/integrate/mod.rs.html#1-335" title="goto source code">[src]</a></span></h1><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>This module provides routines for the orbit integration</p>
+<p>Here is a quick breakdown of what is going on (see
+Bajkova &amp; Bobylev (<a href="https://arxiv.org/abs/2008.13624v1">2020, v1</a>)
+for more details).</p>
+<p>Let the initial positions and space velocities of a
+test particle in the heliocentric coordinate system be
+$ (x_0, y_0 , z_0, u_0, v_0 , w_0) $. The initial positions
+$ (X, Y, Z) $ and velocities $ (U, V, W) $ of the test
+particle in Galactic Cartesian coordinates are then given
+by the formulas:</p>
+<p>$$
+X \, [\text{kpc}] = R_\odot - x_0; \\
+Y \, [\text{kpc}] = y_0; \\
+Z \, [\text{kpc}] = z_0 + h_\odot; \\
+U \, [\text{km} \, \text{s}^{-1}] = u_0 + u_\odot; \\
+V \, [\text{km} \, \text{s}^{-1}] = v_0 + v_\odot + V_\odot; \\
+W \, [\text{km} \, \text{s}^{-1}] = w_0 + w_\odot,
+$$</p>
+<p>where $ R_\odot = 8.3 \, \text{kpc} $ and $ V_\odot = 244 \,
+\text{km} \, \text{s}^{-1} $ are the Galactocentric distance
+and the linear velocity of the Local Standard of Rest around
+the Galactic center, $ h_\odot = 16 \, \text{pc} $ (Bobylev &amp;
+Bajkova (2016)) is the height of the Sun above the Galactic plane,
+$ (u_\odot, v_\odot, w_\odot) = (11.1, 12.2, 7.3) \pm
+(0.7, 0.5, 0.4) \, \text{km s}^{-1} $ (Schönrich et al., 2010)
+is the Sun’s peculiar velocity with respect to the Local Standard
+of Rest.</p>
+<p>The initial positions $ (R, \psi, Z) $ and their time derivatives
+$ (\dot{R}, \dot{\psi}, \dot{Z}) $ are then obtained by the
+formulas:</p>
+<p>$$
+R \, [\text{kpc}] = \sqrt{X^2 + Y^2}; \\
+\psi \, [\text{rad}] = \text{atan2}(Y, X); \\
+\dot{R} \, [\text{km} \, \text{s}^{-1}] = -U \cos{\psi} + V \sin{\psi}; \\
+\dot{\psi} \, [\text{rad} \, \text{s}^{-1}] = (U \sin{\psi} + V \cos{\psi})
+/ R \, [\text{kpc} \rightarrow \text{km}]; \\
+\dot{Z} \, [\text{km} \, \text{s}^{-1}] = W.
+$$</p>
+<p>From here we obtain the initial values of the canonical moments
+$ (p_R, p_\psi, p_Z) $:</p>
+<p>$$
+p_R \, [\text{kpc} \, \text{Myr}^{-1}] = \dot{R} \, [\text{km} \, \text{s}^{-1}
+\rightarrow \text{kpc} \, \text{Myr}^{-1}]; \\
+p_{\psi} \, [\text{kpc}^2 \, \text{rad} \, \text{Myr}^{-1}] = R^2 \dot{\psi} \, [\text{s}^{-1}
+\rightarrow \text{Myr}^{-1}]; \\
+p_Z \, [\text{kpc} \, \text{Myr}^{-1}] = \dot{Z} \, [\text{km} \, \text{s}^{-1}
+\rightarrow \text{kpc} \, \text{Myr}^{-1}].
+$$</p>
+<p>Now we’re all set to integrate the Lagrangian equations</p>
+<p>$$
+\dot{R} \, [\text{kpc} \, \text{Myr}^{-1}] = p_R; \\
+\dot{\psi} \, [\text{rad} \, \text{Myr}^{-1}] = p_\psi / R^2; \\
+\dot{Z} \, [\text{kpc} \, \text{Myr}^{-1}] = p_Z; \\
+\dot{p_R} \, [\text{kpc} \, \text{Myr}^{-2}] = - \partial \Phi(R, Z) / \partial R
+\, [100 \, \text{km} \, \text{s}^{-2} \rightarrow \text{kpc} \, \text{Myr}^{-2}]
++ p_\psi^2 / R^3; \\
+\dot{p_\psi} \, [\text{kpc}^2 \, \text{Myr}^{-2}] = 0; \\
+\dot{p_Z} \, [\text{kpc} \, \text{Myr}^{-2}] = - \partial \Phi(R, Z) / \partial Z
+\, [100 \, \text{km} \, \text{s}^{-2} \rightarrow \text{kpc} \, \text{Myr}^{-2}].
+$$</p>
+<p>To calculate the total energy, we first obtain radial velocity</p>
+<p>$$
+\Pi \, [\text{km} \, \text{s}^{-1}] = -U \frac{X}{R} + V \frac{Y}{R} =
+-(-p_R \, [\text{kpc} \, \text{Myr}^{-1} \rightarrow \text{km} \, \text{s}^{-1}]
+\cos{\psi} + (p_\psi / R) \, [\text{kpc} \, \text{Myr}^{-1} \rightarrow \text{km} \,
+\text{s}^{-1}] \sin{\psi}) \cos{\psi} \\
++ (p_R \, [\text{kpc} \, \text{Myr}^{-1} \rightarrow \text{km} \, \text{s}^{-1}]
+\sin{\psi} - (p_\psi / R) \, [\text{kpc} \, \text{Myr}^{-1} \rightarrow \text{km} \,
+\text{s}^{-1}] \cos{\psi}) \sin{\psi},
+$$</p>
+<p>tangential velocity</p>
+<p>$$
+\Theta \, [\text{km} \, \text{s}^{-1}] = U \frac{Y}{R} + V \frac{X}{R} =
+(-p_R \, [\text{kpc} \, \text{Myr}^{-1} \rightarrow \text{km} \, \text{s}^{-1}]
+\cos{\psi} + (p_\psi / R) \, [\text{kpc} \, \text{Myr}^{-1} \rightarrow \text{km} \,
+\text{s}^{-1}] \sin{\psi}) \sin{\psi} \\
++ (p_R \, [\text{kpc} \, \text{Myr}^{-1} \rightarrow \text{km} \, \text{s}^{-1}]
+\sin{\psi} - (p_\psi / R) \, [\text{kpc} \, \text{Myr}^{-1} \rightarrow \text{km} \,
+\text{s}^{-1}] \cos{\psi}) \cos{\psi},
+$$</p>
+<p>and total 3D velocity $ V_\text{tot} \, [\text{km}^2 \, \text{s}^{-2}] =
+\sqrt{\Pi^2 + \Theta^2 + W^2} = \sqrt{\Pi^2 + \Theta^2 + (p_z \, [\text{kpc} \,
+\text{Myr}^{-1} \rightarrow \text{km} \, \text{s}^{-1}])^2} $.</p>
+<p>Then we can calculate the total energy $ E \, [\text{km}^2 \, \text{s}^{-2}] =
+\Phi(R, Z) \, [\text{km}^2 \, \text{s}^{-2} \rightarrow \text{100} \,
+\text{km}^2 \, \text{s}^{-2}] + V_\text{tot}^2 / 2 $.</p>
+</div></details><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="constants/index.html" title="kidou::orbit::calc::integrate::constants mod">constants</a></div><div class="item-right docblock-short"><p>This module provides constants used during integration</p>
+</div></div></div><h2 id="functions" class="section-header"><a href="#functions">Functions</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.f_p_r.html" title="kidou::orbit::calc::integrate::f_p_r fn">f_p_r</a></div><div class="item-right docblock-short"><p>Calculate the right-hand part of the equation for
+$ \dot{p_r} $ $[ \text{kpc} \, \text{Myr}^{-2} ]$</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.f_p_z.html" title="kidou::orbit::calc::integrate::f_p_z fn">f_p_z</a></div><div class="item-right docblock-short"><p>Calculate the right-hand part of the equation for
+$ \dot{p_z} $ $[ \text{kpc} \, \text{Myr}^{-2} ]$</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.f_psi.html" title="kidou::orbit::calc::integrate::f_psi fn">f_psi</a></div><div class="item-right docblock-short"><p>Calculate the right-hand part of the equation for
+$ \dot{\psi} $ $[ \text{Myr}^{-1} ]$</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.f_r.html" title="kidou::orbit::calc::integrate::f_r fn">f_r</a></div><div class="item-right docblock-short"><p>Calculate the right-hand part of the equation for
+$ \dot{R} $ $[ \text{kpc} \, \text{Myr}^{-1} ]$</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.f_z.html" title="kidou::orbit::calc::integrate::f_z fn">f_z</a></div><div class="item-right docblock-short"><p>Calculate the right-hand part of the equation for
+$ \dot{z} $ $[ \text{kpc} \, \text{Myr}^{-1} ]$</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.radial_velocity.html" title="kidou::orbit::calc::integrate::radial_velocity fn">radial_velocity</a></div><div class="item-right docblock-short"><p>Calculate the value of radial velocity
+$ \Pi $ $[ \text{km} \, \text{s}^{-1} ]$</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.rk4.html" title="kidou::orbit::calc::integrate::rk4 fn">rk4</a></div><div class="item-right docblock-short"><p>Integrate the orbit using the fourth-order Runge-Kutta algorithm</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.tangential_velocity.html" title="kidou::orbit::calc::integrate::tangential_velocity fn">tangential_velocity</a></div><div class="item-right docblock-short"><p>Calculate the value of tangential velocity
+$ \Theta $ $[ \text{km} \, \text{s}^{-1} ]$</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.total_energy.html" title="kidou::orbit::calc::integrate::total_energy fn">total_energy</a></div><div class="item-right docblock-short"><p>Calculate the value of total energy E $[ \text{km}^2 \, \text{s}^{-2} ]$</p>
+</div></div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="kidou" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>
+    <script src="../../../../main.js"></script>
+</body></html>

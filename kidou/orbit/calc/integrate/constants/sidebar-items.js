@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["conversion","Constants and methods that are used to transfer numbers from one unit of measurement to another"],["correction","Constants and methods that are used to correct the coordinates for the solar motion or the Local Standard of Rest"]]});

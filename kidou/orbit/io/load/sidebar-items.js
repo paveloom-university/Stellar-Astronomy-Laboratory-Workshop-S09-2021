@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Log","A representation of the results after parsing the files"],["Record","A representation of a file record"]]});

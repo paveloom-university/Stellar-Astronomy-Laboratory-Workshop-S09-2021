@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["phi","Calculate the value of the Plummer potential"],["phi_dr","Calculate the value of the R derivative of the Plummer potential"],["phi_dz","Calculate the value of the Z derivative of the Plummer potential"]]});
