@@ -5,7 +5,6 @@
 - [Codeberg](https://codeberg.org/paveloom-university/Stellar-Astronomy-Laboratory-Workshop-S09-2021)
 - [GitHub](https://github.com/paveloom-university/Stellar-Astronomy-Laboratory-Workshop-S09-2021)
 - [GitLab](https://gitlab.com/paveloom-g/university/s09-2021/stellar-astronomy-laboratory-workshop)
-- [SourceHut](https://sr.ht/~paveloom/Stellar-Astronomy-Laboratory-Workshop-S09-2021)
 
 2. Make sure you have the following installed:
 
