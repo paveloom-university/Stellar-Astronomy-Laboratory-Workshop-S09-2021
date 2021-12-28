@@ -1,4 +1,6 @@
-## How to reproduce the results
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5807293.svg)](https://doi.org/10.5281/zenodo.5807293)
+
+### How to reproduce the results
 
 1. Check out this repository:
 
@@ -111,13 +113,13 @@
     tectonic -X compile report/report.tex
     ```
 
-## Notices
+### Notices
 
 Reference mirrors:
 - [GitHub Pages](https://paveloom-university.github.io/Stellar-Astronomy-Laboratory-Workshop-S09-2021)
 - [GitLab Pages](https://paveloom-g.gitlab.io/university/s09-2021/stellar-astronomy-laboratory-workshop)
 
-### KaTeX
+#### KaTeX
 
 To build this crate's documentation with [KaTeX](https://katex.org/) support, run:
 
@@ -126,7 +128,7 @@ cargo doc
 RUSTDOCFLAGS="--html-in-header assets/katex-header.html" cargo doc --no-deps --open
 ```
 
-### Julia
+#### Julia
 
 This project provides [Julia](https://julialang.org) scripts. Make sure to use the project files (`Project.toml`) when running them:
 
@@ -148,7 +150,7 @@ To kill the daemon run
 ./julia.bash kill
 ```
 
-### Pluto
+#### Pluto
 
 This project provides Pluto notebooks. You can interact with them in the web interface:
 
@@ -169,6 +171,6 @@ julia --project=. -e "using Pkg; Pkg.instantiate()"
 julia --project=. notebooks/pluto/notebook.jl
 ```
 
-### wxMaxima
+#### wxMaxima
 
 This project provides a [wxMaxima](https://wxmaxima-developers.github.io/wxmaxima/) notebook.
